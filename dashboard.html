@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — ClusterToko</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config={theme:{extend:{colors:{emerald:{'50':'#ecfdf5','100':'#d1fae5','200':'#a7f3d0','500':'#10b981','600':'#059669','700':'#047857'}}}}}
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 shadow-sm z-50">
+        <div class="p-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-emerald-200 shadow-lg">
+                    <i class="fas fa-leaf text-white text-xl"></i>
+                </div>
+                <span class="text-xl font-bold text-gray-800 tracking-tight">Azhar Tani</span>
+            </div>
+        </div>
+        
+        <nav class="flex-1 px-6 space-y-2">
+            <a href="dashboard.html" class="flex items-center gap-4 p-4 bg-emerald-50 text-emerald-700 rounded-2xl font-bold transition-all">
+                <i class="fas fa-th-large text-lg"></i> Dashboard
+            </a>
+            <a href="upload.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+                <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
+            </a>
+            <a href="clustering.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+                <i class="fas fa-braille text-lg"></i> Clustering
+            </a>
+            <a href="hasil.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+                <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-gray-50">
+            <button onclick="_logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-medium">
+                <i class="fas fa-sign-out-alt text-lg"></i> Keluar
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-10 overflow-y-auto">
+        <div id="toast-container"></div>
+        
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-wrap justify-between items-start gap-3 mb-10 fade-up">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900 mb-1">
+                        Selamat datang, <span id="greeting-nama" class="text-emerald-600">Admin</span> 👋
+                    </h1>
+                    <p class="text-gray-500 font-medium">Dashboard Sistem K-Means Clustering — Azhar Tani Mandiri</p>
+                </div>
+                <div id="tanggal-el" class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-5 py-2.5 rounded-2xl font-bold shadow-sm"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 fade-up fade-up-1">
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-4">📦</div>
+                    <div class="text-3xl font-black text-gray-900 mb-1 mono" id="stat-total">—</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Produk</div>
+                </div>
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-xl mb-4">🏆</div>
+                    <div class="text-3xl font-black text-green-600 mb-1 mono" id="stat-paling">—</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Paling Laris</div>
+                </div>
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl mb-4">📈</div>
+                    <div class="text-3xl font-black text-amber-600 mb-1 mono" id="stat-cukup">—</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Cukup Laris</div>
+                </div>
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl mb-4">⚠️</div>
+                    <div class="text-3xl font-black text-red-500 mb-1 mono" id="stat-kurang">—</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Kurang Laris</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-50 fade-up fade-up-2">
+                        <h3 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2">
+                            <i class="fas fa-microchip text-emerald-500"></i> Hasil Clustering Terakhir
+                        </h3>
+                        <div id="info-clustering" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-sm text-gray-400 italic col-span-4">Belum ada data. Jalankan clustering.</div>
+                        </div>
+                    </div>
+
+                    <div id="saran-section" class="hidden fade-up fade-up-4">
+                        <h3 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2">
+                            <i class="fas fa-lightbulb text-amber-500"></i> Saran Terkini
+                        </h3>
+                        <div id="saran-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div id="riwayat-section" class="hidden fade-up fade-up-4">
+                         <h3 class="text-lg font-black text-gray-800 mb-6">Riwayat Upload</h3>
+                         <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                            <div id="riwayat-list" class="divide-y divide-gray-50"></div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script src="assets/js/config.js"></script>
+<script type="module">
+import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+import { getAuth, onAuthStateChanged, signOut }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+import { formatTanggal, formatRupiah, formatAngka, interpretasiSil, toast }
+  from './assets/js/utils.js'
+import { apiGetHasil, apiGetPivot, apiGetRiwayatUpload } from './assets/js/api.js'
+
+const app  = initializeApp(FIREBASE_CONFIG)
+const auth = getAuth(app)
+
+window._logout = async () => { await signOut(auth); localStorage.clear(); location.href = 'index.html' }
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = 'index.html'; return }
+  const token = await user.getIdToken(true)
+  localStorage.setItem('fb_token', token)
+  const nama = localStorage.getItem('user_nama') || 'Admin'
+  
+  document.getElementById('greeting-nama').textContent  = nama
+  document.getElementById('tanggal-el').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+  loadDashboard()
+})
+
+async function loadDashboard() {
+  try {
+    const [hasilRes, pivotRes, riwayatRes] = await Promise.all([
+      apiGetHasil(), apiGetPivot(), apiGetRiwayatUpload()
+    ])
+
+    document.getElementById('stat-total').textContent = formatAngka(pivotRes.total || 0)
+
+    if (hasilRes.run && hasilRes.ringkasan) {
+      const r = hasilRes.run
+      const k = hasilRes.ringkasan
+      document.getElementById('stat-paling').textContent = k.paling_laris
+      document.getElementById('stat-cukup').textContent  = k.cukup_laris
+      document.getElementById('stat-kurang').textContent = k.kurang_laris
+
+      const sil = interpretasiSil(r.sil_score)
+      document.getElementById('info-clustering').innerHTML = `
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
+            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">SSE</div>
+            <div class="text-sm font-bold text-emerald-700 mono">${r.sse_final}</div>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
+            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">Sil Score</div>
+            <div class="text-sm font-bold text-emerald-700 mono">${r.sil_score}</div>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
+            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">Iterasi</div>
+            <div class="text-sm font-bold text-emerald-700 mono">${r.iterasi}x</div>
+        </div>
+        <div class="bg-emerald-600 rounded-2xl p-4 text-center text-white shadow-lg shadow-emerald-100">
+            <div class="text-[10px] font-bold uppercase opacity-80 mb-1">Status</div>
+            <div class="text-[10px] font-black uppercase">${sil.label}</div>
+        </div>
+      `
+    }
+
+    if (hasilRes.saran?.length) {
+      document.getElementById('saran-section').classList.remove('hidden')
+      const borderMap = { green:'emerald-500', amber:'amber-500', red:'red-500' }
+      document.getElementById('saran-container').innerHTML = hasilRes.saran.map(s => `
+        <div class="bg-white border-l-4 border-${borderMap[s.warna]} rounded-2xl p-5 shadow-sm shadow-gray-100">
+          <div class="flex gap-3 items-center mb-3">
+            <span class="text-xl">${s.icon}</span>
+            <div class="text-sm font-black text-gray-800">${s.judul}</div>
+          </div>
+          <p class="text-xs text-gray-500 leading-relaxed mb-4">${s.isi}</p>
+          <div class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-lg inline-block">
+            ${s.produk.length} Produk Terdeteksi
+          </div>
+        </div>
+      `).join('')
+    }
+
+    if (riwayatRes?.length) {
+      document.getElementById('riwayat-section').classList.remove('hidden')
+      document.getElementById('riwayat-list').innerHTML = riwayatRes.slice(0,5).map((r,i) => `
+        <div class="p-4 hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3 mb-1">
+            <span class="text-lg">${r.tipe_file==='pdf'?'📄':'📊'}</span>
+            <div class="text-sm font-bold text-gray-700 truncate">${r.nama_file}</div>
+          </div>
+          <div class="text-[10px] text-gray-400 font-medium">
+            ${new Date(r.created_at).toLocaleDateString()} · ${r.produk_unik} Item
+          </div>
+        </div>
+      `).join('')
+    }
+  } catch(e) {
+    console.error(e)
+    toast('Gagal memuat data: ' + e.message, 'error')
+  }
+}
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // Pastikan path-nya sesuai posisi sw.js kamu
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
+        .catch(err => console.log('Gagal daftar SW:', err));
+    });
+  }
+</script>
+</body>
+</html>

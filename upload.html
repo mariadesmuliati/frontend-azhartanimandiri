@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Data — ClusterToko</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config={theme:{extend:{colors:{teal:{'50':'#f0fdfa','100':'#ccfbf1','200':'#99f6e4','500':'#14b8a6','600':'#0d9488','700':'#0f766e'}}}}}
+  </script>
+</head>
+<body class="bg-[#f8fafc] min-h-screen flex">
+
+  <aside class="w-64 bg-white border-r border-teal-100 flex flex-col h-screen sticky top-0 z-50">
+    <div class="p-8 flex items-center gap-3">
+        <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-100">
+            <i class="fas fa-leaf text-white text-lg"></i>
+        </div>
+        <span class="text-xl font-bold text-teal-800 tracking-tight">Azhar Tani</span>
+    </div>
+    
+    <nav class="flex-1 px-4 space-y-2">
+        <a href="dashboard.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
+            <i class="fas fa-th-large text-lg"></i> Dashboard
+        </a>
+        <a href="upload.html" class="flex items-center gap-4 p-4 bg-teal-50 text-teal-600 rounded-2xl font-black text-sm shadow-sm">
+            <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
+        </a>
+        <a href="clustering.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
+            <i class="fas fa-braille text-lg"></i> Clustering
+        </a>
+        <a href="hasil.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
+            <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
+        </a>
+    </nav>
+
+    <div class="p-6 mt-auto border-t border-gray-50">
+        <button onclick="window._logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-bold text-sm group">
+            <i class="fas fa-sign-out-alt text-lg group-hover:translate-x-1 transition-transform"></i>
+            <span>Keluar</span>
+        </button>
+    </div>
+</aside>
+
+  <main class="flex-1 p-8 overflow-y-auto">
+    <div id="toast-container"></div>
+
+    <div class="max-w-5xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-black text-teal-900 mb-2">Upload Data</h1>
+        <p class="text-sm text-gray-400 font-medium">Impor berkas Excel atau PDF untuk diproses ke database sistem</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="space-y-6">
+          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
+            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">📂 Area Unggah Berkas</h2>
+            
+            <div id="dropzone" 
+                 class="group border-2 border-dashed border-teal-100 rounded-[2rem] p-10 text-center cursor-pointer hover:border-teal-400 hover:bg-teal-50 transition-all mb-6"
+                 onclick="document.getElementById('inp-file').click()"
+                 ondragover="event.preventDefault();this.classList.add('bg-teal-50','border-teal-400')"
+                 ondragleave="this.classList.remove('bg-teal-50','border-teal-400')"
+                 ondrop="handleDrop(event)">
+              <div id="dz-icon" class="text-5xl mb-4 grayscale group-hover:grayscale-0 transition-all">📁</div>
+              <div id="dz-title" class="font-black text-gray-700 mb-1">Letakkan file di sini</div>
+              <div id="dz-sub" class="text-[11px] font-bold text-gray-300 uppercase tracking-tighter">XLSX, XLS, atau PDF (Maks 20MB)</div>
+              <input id="inp-file" type="file" accept=".xlsx,.xls,.pdf" class="hidden" onchange="pilihFile(this.files[0])">
+            </div>
+
+            <div class="mb-8">
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Opsi Penggantian Data</p>
+              <div class="grid grid-cols-2 gap-3">
+                <button id="btn-replace" onclick="setMode('replace')" class="flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all">
+                  <span class="text-lg mb-1">🔄</span>
+                  <span class="text-xs font-black">Ganti Data</span>
+                  <span class="text-[10px] opacity-60 font-medium">Hapus & timpa baru</span>
+                </button>
+                <button id="btn-append" onclick="setMode('append')" class="flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all">
+                  <span class="text-lg mb-1">➕</span>
+                  <span class="text-xs font-black">Tambah Data</span>
+                  <span class="text-[10px] opacity-60 font-medium">Gabung data lama</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="upload-error" class="hidden bg-red-50 border border-red-100 text-red-600 text-[11px] font-bold p-4 rounded-2xl mb-4"></div>
+
+            <button id="btn-upload" onclick="doUpload()" disabled class="w-full bg-teal-600 text-white font-black py-4 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-teal-100 disabled:opacity-30 disabled:shadow-none text-sm">
+              ▶ Mulai Proses Sinkronisasi
+            </button>
+          </div>
+
+          <div id="hasil-upload" class="hidden bg-emerald-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-emerald-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center font-black">✓</div>
+              <span class="text-xs font-black uppercase tracking-widest">Berhasil Diunggah</span>
+            </div>
+            <div id="hasil-detail"></div>
+            <a href="clustering.html" class="mt-6 inline-block bg-white text-emerald-600 text-xs font-black px-6 py-3 rounded-xl hover:bg-emerald-50 transition-colors">⚙️ Menuju Clustering →</a>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
+            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">📋 Standar Format</h2>
+            <div class="space-y-6">
+              <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xs font-black flex-shrink-0">1</div>
+                <div>
+                  <p class="text-xs font-black text-gray-800 mb-1">Struktur Kolom Utama</p>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Nama Barang</span>
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Qty</span>
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Total</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xs font-black flex-shrink-0">2</div>
+                <div>
+                  <p class="text-xs font-black text-gray-800 mb-1">Ketentuan PDF</p>
+                  <p class="text-[11px] text-gray-400 leading-relaxed font-medium">Bukan berupa hasil scan/foto. Pastikan teks di PDF bisa disorot (selectable text) agar terbaca sistem.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
+            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">🕐 Riwayat Terakhir</h2>
+            <div id="riwayat-list" class="space-y-4">
+              <div class="text-xs text-gray-400 font-bold italic animate-pulse">Menghubungkan ke database...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+    import { formatAngka, toast } from './assets/js/utils.js'
+    import { apiUploadFile, apiGetRiwayatUpload } from './assets/js/api.js'
+
+    const app = initializeApp(FIREBASE_CONFIG); 
+    const auth = getAuth(app);
+
+    // Fungsi Logout Global
+    window._logout = async () => { 
+        if(confirm('Apakah Anda yakin ingin keluar?')) {
+            await signOut(auth); 
+            localStorage.clear(); 
+            location.href='index.html'; 
+        }
+    }
+
+    let selectedFile = null; 
+    let selectedMode = 'replace';
+
+    onAuthStateChanged(auth, async user => {
+        if (!user) { location.href='index.html'; return }
+        muatRiwayat()
+    })
+
+    window.handleDrop = (e) => {
+        e.preventDefault(); 
+        const file = e.dataTransfer.files[0]
+        if (file) pilihFile(file)
+    }
+
+    window.pilihFile = (file) => {
+        if (!file) return
+        if (!file.name.match(/\.(xlsx|xls|pdf)$/i)) { toast('Format tidak didukung!', 'error'); return }
+        selectedFile = file
+        const isPDF = file.name.toLowerCase().endsWith('.pdf')
+        document.getElementById('dz-icon').textContent = isPDF ? '📄' : '📊'; 
+        document.getElementById('dz-icon').classList.remove('grayscale')
+        document.getElementById('dz-title').textContent = file.name
+        document.getElementById('dz-sub').textContent = `${(file.size/1024/1024).toFixed(2)} MB • Klik ganti`
+        document.getElementById('btn-upload').disabled = false
+    }
+
+    window.setMode = (mode) => {
+        selectedMode = mode
+        const rBtn = document.getElementById('btn-replace'); 
+        const aBtn = document.getElementById('btn-append')
+        rBtn.className = mode === 'replace' ? 'flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all' : 'flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all'
+        aBtn.className = mode === 'append' ? 'flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all' : 'flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all'
+    }
+
+    window.doUpload = async () => {
+        if (!selectedFile) return
+        const btn = document.getElementById('btn-upload'); 
+        btn.innerHTML = '⚙️ Sedang Memproses...'; 
+        btn.disabled = true
+        try {
+            const hasil = await apiUploadFile(selectedFile, selectedMode)
+            document.getElementById('hasil-upload').classList.remove('hidden')
+            document.getElementById('hasil-detail').innerHTML = `
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white/10 p-4 rounded-2xl">
+                        <div class="text-xl font-black font-mono">${formatAngka(hasil.valid_baris)}</div>
+                        <div class="text-[9px] font-black uppercase opacity-60">Baris Valid</div>
+                    </div>
+                    <div class="bg-white/10 p-4 rounded-2xl">
+                        <div class="text-xl font-black font-mono">${formatAngka(hasil.produk_unik)}</div>
+                        <div class="text-[9px] font-black uppercase opacity-60">Produk Unik</div>
+                    </div>
+                </div>
+                <p class="text-[11px] font-bold opacity-80">${hasil.pesan}</p>
+            `
+            toast('Berhasil!', 'success'); 
+            muatRiwayat()
+        } catch(e) {
+            document.getElementById('upload-error').textContent = '⚠ ' + e.message; 
+            document.getElementById('upload-error').classList.remove('hidden')
+            toast(e.message, 'error')
+        } finally { 
+            btn.innerHTML = '▶ Mulai Proses Sinkronisasi'; 
+            btn.disabled = false 
+        }
+    }
+
+    async function muatRiwayat() {
+        try {
+            const data = await apiGetRiwayatUpload()
+            document.getElementById('riwayat-list').innerHTML = data.length ? data.map(r => `
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <span class="text-2xl">${r.tipe_file==='pdf'?'📄':'📊'}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[11px] font-black text-gray-700 truncate">${r.nama_file}</div>
+                        <div class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">${new Date(r.created_at).toLocaleDateString('id-ID')} • ${r.valid_baris} Baris</div>
+                    </div>
+                </div>`).join('') : '<div class="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Belum ada aktivitas</div>'
+        } catch(e) { 
+            document.getElementById('riwayat-list').innerHTML = '<div class="text-red-400 text-[10px]">Error Database</div>' 
+        }
+    }
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // Pastikan path-nya sesuai posisi sw.js kamu
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
+        .catch(err => console.log('Gagal daftar SW:', err));
+    });
+  }
+</script>
+</body>
+</html>

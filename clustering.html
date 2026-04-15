@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clustering — ClusterToko</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config={theme:{extend:{colors:{emerald:{'50':'#ecfdf5','100':'#d1fae5','200':'#a7f3d0','500':'#10b981','600':'#059669','700':'#047857'}}}}}</script>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+  <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 shadow-sm z-50">
+    <div class="p-8">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-emerald-200 shadow-lg">
+                <i class="fas fa-leaf text-white text-xl"></i>
+            </div>
+            <span class="text-xl font-bold text-gray-800 tracking-tight">Azhar Tani</span>
+        </div>
+    </div>
+    <nav class="flex-1 px-6 space-y-2">
+        <a href="dashboard.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+            <i class="fas fa-th-large text-lg"></i> Dashboard
+        </a>
+        <a href="upload.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+            <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
+        </a>
+        <a href="clustering.html" class="flex items-center gap-4 p-4 bg-emerald-50 text-emerald-700 rounded-2xl font-bold transition-all">
+            <i class="fas fa-braille text-lg"></i> Clustering
+        </a>
+        <a href="hasil.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
+            <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
+        </a>
+    </nav>
+    <div class="p-6 border-t border-gray-50">
+        <button onclick="_logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-medium">
+            <i class="fas fa-sign-out-alt text-lg"></i> Keluar
+        </button>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-10 overflow-y-auto">
+    <div id="toast-container"></div>
+    
+    <div class="max-w-4xl mx-auto">
+      <div class="mb-10 fade-up">
+        <h1 class="text-3xl font-black text-gray-900 mb-1">Clustering K-Means</h1>
+        <p class="text-gray-500 font-medium">Atur centroid awal dan jalankan analisis pengelompokkan produk.</p>
+      </div>
+
+      <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-50 mb-10 fade-up fade-up-1">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="font-black text-gray-800 uppercase tracking-widest text-xs">⚙️ Pengaturan Centroid Awal</h2>
+            <button onclick="resetCentroid()" class="text-[10px] font-black bg-gray-100 text-gray-500 px-4 py-2 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-all">
+                ↺ RESET DEFAULT
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="p-6 bg-emerald-50 rounded-[2rem] border border-emerald-100">
+                <div class="text-[10px] font-black text-emerald-600 uppercase mb-4 tracking-tighter">Cluster 1 (Paling Laris)</div>
+                <div class="space-y-4">
+                    <input id="c1-qty" type="number" step="0.0001" value="0.6157" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-emerald-500">
+                    <input id="c1-total" type="number" step="0.0001" value="0.1505" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-emerald-500">
+                </div>
+            </div>
+            <div class="p-6 bg-amber-50 rounded-[2rem] border border-amber-100">
+                <div class="text-[10px] font-black text-amber-600 uppercase mb-4 tracking-tighter">Cluster 2 (Cukup Laris)</div>
+                <div class="space-y-4">
+                    <input id="c2-qty" type="number" step="0.0001" value="0.1116" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-amber-500">
+                    <input id="c2-total" type="number" step="0.0001" value="0.0322" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-amber-500">
+                </div>
+            </div>
+            <div class="p-6 bg-red-50 rounded-[2rem] border border-red-100">
+                <div class="text-[10px] font-black text-red-600 uppercase mb-4 tracking-tighter">Cluster 3 (Kurang Laris)</div>
+                <div class="space-y-4">
+                    <input id="c3-qty" type="number" step="0.0001" value="0.0207" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-red-500">
+                    <input id="c3-total" type="number" step="0.0001" value="0.0056" class="w-full p-3 bg-white border-none rounded-xl shadow-sm font-bold text-gray-700 outline-none focus:ring-2 ring-red-500">
+                </div>
+            </div>
+        </div>
+
+        <div id="cl-error" class="hidden bg-red-50 text-red-600 p-4 rounded-2xl mb-6 text-sm font-bold text-center"></div>
+
+        <button id="btn-run" onclick="doJalankan()" class="w-full bg-gray-900 hover:bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-play"></i> JALANKAN ANALISIS SEKARANG
+        </button>
+      </div>
+
+      <div id="hasil-section" class="hidden space-y-10">
+          <div class="bg-emerald-600 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-emerald-200 fade-up">
+              <h2 class="text-xl font-black mb-10 flex items-center gap-3">
+                  <i class="fas fa-check-circle"></i> Hasil Clustering Berhasil
+              </h2>
+              
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                  <div>
+                      <div class="text-[10px] font-black opacity-60 uppercase mb-2">Iterasi</div>
+                      <div id="res-iterasi" class="text-4xl font-black">—</div>
+                  </div>
+                  <div>
+                      <div class="text-[10px] font-black opacity-60 uppercase mb-2">SSE Final</div>
+                      <div id="res-sse" class="text-4xl font-black">—</div>
+                  </div>
+                  <div>
+                      <div class="text-[10px] font-black opacity-60 uppercase mb-2">Silhouette</div>
+                      <div id="res-sil" class="text-4xl font-black">—</div>
+                  </div>
+                  <div>
+                      <div class="text-[10px] font-black opacity-60 uppercase mb-2">Total Produk</div>
+                      <div id="res-total" class="text-4xl font-black">—</div>
+                  </div>
+              </div>
+
+              <div class="mt-12 pt-10 border-t border-white/20">
+                <h3 class="font-black mb-4 text-sm opacity-80">RINGKASAN KELOMPOK</h3>
+                <div id="ringkasan" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+              </div>
+          </div>
+
+          <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 fade-up">
+            <h3 class="font-black text-gray-800 mb-6 uppercase text-xs tracking-widest">Interpretasi Kualitas (Silhouette)</h3>
+            <div id="sil-bar" class="h-4 rounded-full overflow-hidden flex mb-4 bg-gray-100">
+                <div style="width:25%" class="bg-red-400"></div>
+                <div style="width:25%" class="bg-amber-400"></div>
+                <div style="width:25%" class="bg-emerald-400"></div>
+                <div style="width:25%" class="bg-emerald-600"></div>
+            </div>
+            <p id="sil-ket" class="text-gray-600 text-sm font-medium leading-relaxed"></p>
+            <div class="mt-8">
+                <a href="hasil.html" class="inline-block bg-emerald-600 text-white font-black px-8 py-4 rounded-2xl shadow-lg hover:bg-emerald-700 transition-all">
+                    Lihat Tabel Detail & Saran →
+                </a>
+            </div>
+          </div>
+      </div>
+    </div>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+import { interpretasiSil, toast } from './assets/js/utils.js'
+import { apiJalankanClustering } from './assets/js/api.js'
+
+const app = initializeApp(FIREBASE_CONFIG); const auth = getAuth(app)
+window._logout = async () => { await signOut(auth); localStorage.clear(); location.href='index.html' }
+
+onAuthStateChanged(auth, user => { if (!user) location.href='index.html' })
+
+window.resetCentroid = function() {
+  document.getElementById('c1-qty').value = '0.6157'; document.getElementById('c1-total').value = '0.1505'
+  document.getElementById('c2-qty').value = '0.1116'; document.getElementById('c2-total').value = '0.0322'
+  document.getElementById('c3-qty').value = '0.0207'; document.getElementById('c3-total').value = '0.0056'
+}
+
+window.doJalankan = async function() {
+  const btn = document.getElementById('btn-run'); const errEl = document.getElementById('cl-error')
+  const centroids = [
+    [parseFloat(document.getElementById('c1-qty').value), parseFloat(document.getElementById('c1-total').value)],
+    [parseFloat(document.getElementById('c2-qty').value), parseFloat(document.getElementById('c2-total').value)],
+    [parseFloat(document.getElementById('c3-qty').value), parseFloat(document.getElementById('c3-total').value)],
+  ]
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+  try {
+    const h = await apiJalankanClustering(centroids)
+    document.getElementById('res-iterasi').textContent = h.iterasi + 'x'
+    document.getElementById('res-sse').textContent = h.sse_final
+    document.getElementById('res-sil').textContent = h.sil_score
+    document.getElementById('res-total').textContent = h.total_produk
+
+    const colors = { 'paling laris':'bg-white/20', 'cukup laris':'bg-white/10', 'kurang laris':'bg-white/5' }
+    document.getElementById('ringkasan').innerHTML = [
+      { label:'Paling Laris', val: h.ringkasan.paling_laris },
+      { label:'Cukup Laris', val: h.ringkasan.cukup_laris },
+      { label:'Kurang Laris', val: h.ringkasan.kurang_laris },
+    ].map(r => `<div class="p-4 rounded-2xl ${colors[r.label.toLowerCase()]} border border-white/10 text-center"><div class="text-2xl font-black">${r.val}</div><div class="text-[9px] font-black uppercase opacity-60">${r.label}</div></div>`).join('')
+
+    const sil = interpretasiSil(h.sil_score)
+    document.getElementById('sil-ket').innerHTML = `<strong>${sil.label} (${h.sil_score})</strong>. ${h.sil_score >= 0.5 ? 'Struktur pengelompokkan sangat solid.' : 'Hasil cukup baik untuk analisis stok.'}`
+    document.getElementById('hasil-section').classList.remove('hidden')
+    document.getElementById('hasil-section').scrollIntoView({ behavior: 'smooth' })
+    toast('Clustering Selesai!', 'success')
+  } catch(e) { errEl.textContent = e.message; errEl.classList.remove('hidden'); toast('Gagal!', 'error') }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-play"></i> JALANKAN ANALISIS SEKARANG' }
+}
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // Pastikan path-nya sesuai posisi sw.js kamu
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
+        .catch(err => console.log('Gagal daftar SW:', err));
+    });
+  }
+</script>
+</body>
+</html>
