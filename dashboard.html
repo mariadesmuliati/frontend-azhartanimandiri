@@ -8,119 +8,522 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <script>
         tailwind.config={theme:{extend:{colors:{emerald:{'50':'#ecfdf5','100':'#d1fae5','200':'#a7f3d0','500':'#10b981','600':'#059669','700':'#047857'}}}}}
     </script>
-</head>
-<body class="bg-gray-50 min-h-screen flex">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
-    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 shadow-sm z-50">
-        <div class="p-8">
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f1117;
+            background-image:
+                linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            min-height: 100vh;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ── SIDEBAR ── */
+        aside {
+            background: linear-gradient(180deg, #111827 0%, #0f1117 100%);
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+        .nav-logo-ring {
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 0 20px rgba(5,150,105,0.4);
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.4);
+            transition: all 0.2s;
+            border-radius: 14px;
+        }
+        .nav-link:hover {
+            background: rgba(16,185,129,0.1);
+            color: #34d399;
+        }
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15));
+            color: #34d399;
+            border: 1px solid rgba(52,211,153,0.2);
+        }
+        .nav-link-logout {
+            color: rgba(248,113,113,0.6);
+            transition: all 0.2s;
+            border-radius: 14px;
+        }
+        .nav-link-logout:hover {
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+        }
+        .brand-name { color: #f9fafb; }
+        .sidebar-divider { border-color: rgba(255,255,255,0.06); }
+
+        /* ── HEADER ── */
+        .header-title { color: #f9fafb; }
+        .header-sub { color: rgba(255,255,255,0.35); }
+        .chip-ai {
+            background: rgba(5,150,105,0.15);
+            border: 1px solid rgba(52,211,153,0.25);
+            color: #34d399;
+            border-radius: 20px;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .chip-ai-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse-dot 2s ease infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.5; transform:scale(0.8); }
+        }
+        .chip-date {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            border-radius: 20px;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        /* ── STAT CARDS ── */
+        .stat-card {
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .stat-card:hover { transform: translateY(-4px); }
+        .stat-card:active { transform: translateY(-1px) scale(0.98); }
+
+        /* Card Total - emerald */
+        .card-total {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+            border-color: rgba(52,211,153,0.2);
+            box-shadow: 0 4px 24px rgba(5,150,105,0.25);
+        }
+        .card-total:hover { box-shadow: 0 12px 40px rgba(5,150,105,0.4); border-color: rgba(52,211,153,0.4); }
+        .card-total.active-card { background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 16px 48px rgba(16,185,129,0.5); }
+
+        /* Card Paling Laris - green */
+        .card-paling {
+            background: linear-gradient(135deg, #14532d 0%, #166534 60%, #15803d 100%);
+            border-color: rgba(74,222,128,0.2);
+            box-shadow: 0 4px 24px rgba(22,101,52,0.3);
+        }
+        .card-paling:hover { box-shadow: 0 12px 40px rgba(22,163,74,0.45); border-color: rgba(74,222,128,0.4); }
+        .card-paling.active-card { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); box-shadow: 0 16px 48px rgba(34,197,94,0.5); }
+
+        /* Card Cukup Laris - amber */
+        .card-cukup {
+            background: linear-gradient(135deg, #78350f 0%, #92400e 60%, #b45309 100%);
+            border-color: rgba(251,191,36,0.2);
+            box-shadow: 0 4px 24px rgba(120,53,15,0.35);
+        }
+        .card-cukup:hover { box-shadow: 0 12px 40px rgba(217,119,6,0.45); border-color: rgba(251,191,36,0.4); }
+        .card-cukup.active-card { background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); box-shadow: 0 16px 48px rgba(251,191,36,0.5); }
+
+        /* Card Kurang Laris - red */
+        .card-kurang {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 60%, #b91c1c 100%);
+            border-color: rgba(252,165,165,0.2);
+            box-shadow: 0 4px 24px rgba(127,29,29,0.35);
+        }
+        .card-kurang:hover { box-shadow: 0 12px 40px rgba(220,38,38,0.45); border-color: rgba(252,165,165,0.4); }
+        .card-kurang.active-card { background: linear-gradient(135deg, #dc2626 0%, #f87171 100%); box-shadow: 0 16px 48px rgba(248,113,113,0.5); }
+
+        .stat-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .stat-num { font-size: 36px; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 4px; }
+        .stat-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; }
+        .stat-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 8px; font-weight: 500; }
+        .stat-glow {
+            position: absolute;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            top: -20px; right: -20px;
+            pointer-events: none;
+        }
+
+        /* ── CONTENT CARDS ── */
+        .content-card {
+            background: rgba(17,24,39,0.8);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(12px);
+        }
+        .content-card-title {
+            color: #f9fafb;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .title-icon {
+            width: 30px; height: 30px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ── METRIC MINI ── */
+        .metric-mini {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .metric-mini:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.12);
+        }
+        .metric-val { font-size: 18px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
+        .metric-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .metric-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 4px; }
+
+        .status-badge {
+            background: linear-gradient(135deg, #059669, #047857);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(5,150,105,0.35);
+        }
+        .status-badge-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .status-badge-val { font-size: 13px; font-weight: 800; color: #fff; }
+
+        /* ── DONUT LEGEND ── */
+        .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .legend-label { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .legend-count { font-size: 14px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
+        .legend-pct { font-size: 11px; color: rgba(255,255,255,0.3); width: 40px; text-align: right; }
+        .mini-bar-track { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.06); max-width: 80px; }
+        .mini-bar-fill { height: 100%; border-radius: 3px; }
+
+        /* ── SARAN CARDS ── */
+        .saran-card {
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid;
+            transition: all 0.2s;
+            cursor: default;
+        }
+        .saran-card:hover { transform: translateY(-2px); }
+        .saran-green { background: linear-gradient(135deg, rgba(20,83,45,0.5), rgba(22,101,52,0.3)); border-color: rgba(74,222,128,0.2); }
+        .saran-amber { background: linear-gradient(135deg, rgba(120,53,15,0.5), rgba(146,64,14,0.3)); border-color: rgba(251,191,36,0.2); }
+        .saran-red   { background: linear-gradient(135deg, rgba(127,29,29,0.5), rgba(153,27,27,0.3)); border-color: rgba(252,165,165,0.2); }
+
+        /* ── RIWAYAT ── */
+        .riwayat-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.15s;
+        }
+        .riwayat-item:last-child { border-bottom: none; }
+        .riwayat-item:hover { background: rgba(255,255,255,0.03); }
+        .riwayat-file-icon {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .riwayat-nama { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); }
+        .riwayat-meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f1117; }
+        ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up { animation: fadeUp 0.4s ease both; }
+        .fade-up-1 { animation-delay: 0.06s; }
+        .fade-up-2 { animation-delay: 0.12s; }
+        .fade-up-3 { animation-delay: 0.18s; }
+        .fade-up-4 { animation-delay: 0.24s; }
+
+        /* toast */
+        #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
+        .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+        .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
+        .toast-error   { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+        .toast-info    { background:#1e3a5f; color:#93c5fd; border:1px solid rgba(147,197,253,0.3); }
+    </style>
+</head>
+<body class="min-h-screen flex">
+
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+        <div class="p-6 pb-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-emerald-200 shadow-lg">
-                    <i class="fas fa-leaf text-white text-xl"></i>
+                <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-leaf text-white text-lg"></i>
                 </div>
-                <span class="text-xl font-bold text-gray-800 tracking-tight">Azhar Tani</span>
+                <span class="text-lg font-bold brand-name tracking-tight">Azhar Tani</span>
             </div>
         </div>
-        
-        <nav class="flex-1 px-6 space-y-2">
-            <a href="dashboard.html" class="flex items-center gap-4 p-4 bg-emerald-50 text-emerald-700 rounded-2xl font-bold transition-all">
-                <i class="fas fa-th-large text-lg"></i> Dashboard
+
+        <nav class="flex-1 px-4 space-y-1 mt-2">
+            <a href="dashboard.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm">
+                <i class="fas fa-th-large w-4 text-center"></i> Dashboard
             </a>
-            <a href="upload.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
-                <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
+            <a href="upload.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+                <i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data
             </a>
-            <a href="clustering.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
-                <i class="fas fa-braille text-lg"></i> Clustering
+            <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+                <i class="fas fa-braille w-4 text-center"></i> Clustering
             </a>
-            <a href="hasil.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-2xl transition-all font-medium">
-                <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
+            <a href="hasil.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+                <i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran
             </a>
         </nav>
 
-        <div class="p-6 border-t border-gray-50">
-            <button onclick="_logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-medium">
-                <i class="fas fa-sign-out-alt text-lg"></i> Keluar
+        <div class="p-4 sidebar-divider border-t">
+            <button onclick="_logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm">
+                <i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar
             </button>
         </div>
     </aside>
 
-    <main class="flex-1 p-10 overflow-y-auto">
+    <!-- ═══════════════ MAIN ═══════════════ -->
+    <main class="flex-1 overflow-y-auto p-8">
         <div id="toast-container"></div>
-        
         <div class="max-w-6xl mx-auto">
-            <div class="flex flex-wrap justify-between items-start gap-3 mb-10 fade-up">
+
+            <!-- HEADER -->
+            <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
                 <div>
-                    <h1 class="text-3xl font-black text-gray-900 mb-1">
-                        Selamat datang, <span id="greeting-nama" class="text-emerald-600">Admin</span> 👋
+                    <h1 class="text-3xl font-black header-title mb-1">
+                        Selamat datang, <span id="greeting-nama" class="text-emerald-400">Admin</span>
                     </h1>
-                    <p class="text-gray-500 font-medium">Dashboard Sistem K-Means Clustering — Azhar Tani Mandiri</p>
+                    <p class="header-sub text-sm font-medium">Dashboard Sistem K-Means Clustering — Azhar Tani Mandiri</p>
                 </div>
-                <div id="tanggal-el" class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-5 py-2.5 rounded-2xl font-bold shadow-sm"></div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 fade-up fade-up-1">
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
-                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl mb-4">📦</div>
-                    <div class="text-3xl font-black text-gray-900 mb-1 mono" id="stat-total">—</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Produk</div>
-                </div>
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
-                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-xl mb-4">🏆</div>
-                    <div class="text-3xl font-black text-green-600 mb-1 mono" id="stat-paling">—</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Paling Laris</div>
-                </div>
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
-                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl mb-4">📈</div>
-                    <div class="text-3xl font-black text-amber-600 mb-1 mono" id="stat-cukup">—</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Cukup Laris</div>
-                </div>
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
-                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl mb-4">⚠️</div>
-                    <div class="text-3xl font-black text-red-500 mb-1 mono" id="stat-kurang">—</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Kurang Laris</div>
+                <div class="flex items-center gap-3">
+                    <div class="chip-ai">
+                        <span class="chip-ai-dot"></span>
+                        Sistem Clustering aktif
+                    </div>
+                    <div class="chip-date">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span id="tanggal-teks"></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-8">
-                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-50 fade-up fade-up-2">
-                        <h3 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2">
-                            <i class="fas fa-microchip text-emerald-500"></i> Hasil Clustering Terakhir
-                        </h3>
-                        <div id="info-clustering" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-sm text-gray-400 italic col-span-4">Belum ada data. Jalankan clustering.</div>
+            <!-- STAT CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-7 fade-up fade-up-1">
+
+                <div class="stat-card card-total" onclick="toggleCard(this)">
+                    <div class="stat-glow"></div>
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    <div class="stat-num mono" id="stat-total">—</div>
+                    <div class="stat-label">Total Produk</div>
+                    <div class="stat-sub">Semua Produk terdaftar</div>
+                </div>
+
+                <div class="stat-card card-paling" onclick="toggleCard(this)">
+                    <div class="stat-glow"></div>
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                    </div>
+                    <div class="stat-num mono" id="stat-paling">—</div>
+                    <div class="stat-label">Paling Laris</div>
+                    <div class="stat-sub">Cluster unggulan</div>
+                </div>
+
+                <div class="stat-card card-cukup" onclick="toggleCard(this)">
+                    <div class="stat-glow"></div>
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <div class="stat-num mono" id="stat-cukup">—</div>
+                    <div class="stat-label">Cukup Laris</div>
+                    <div class="stat-sub">Potensial ditingkatkan</div>
+                </div>
+
+                <div class="stat-card card-kurang" onclick="toggleCard(this)">
+                    <div class="stat-glow"></div>
+                    <div class="stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="stat-num mono" id="stat-kurang">—</div>
+                    <div class="stat-label">Kurang Laris</div>
+                    <div class="stat-sub">Perlu evaluasi segera</div>
+                </div>
+
+            </div>
+
+            <!-- MAIN GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- KIRI -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Hasil Clustering -->
+                    <div class="content-card fade-up fade-up-2">
+                        <div class="content-card-title">
+                            <div class="title-icon" style="background:rgba(5,150,105,0.2);">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                            </div>
+                            Hasil Clustering Terakhir
+                        </div>
+                        <div id="info-clustering" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="text-sm col-span-4" style="color:rgba(255,255,255,0.3); font-style:italic;">Belum ada data. Jalankan clustering.</div>
                         </div>
                     </div>
 
+                    <!-- Donut Chart -->
+                    <div id="chart-section" class="hidden content-card fade-up fade-up-3">
+                        <div class="content-card-title">
+                            <div class="title-icon" style="background:rgba(59,130,246,0.15);">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                            </div>
+                            Distribusi Cluster Produk
+                            <span style="font-size:11px; color:rgba(255,255,255,0.25); font-weight:400; margin-left:4px;">— K-Means terakhir</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-8">
+                            <div style="position:relative; width:180px; height:180px; flex-shrink:0;">
+                                <canvas id="donutChart" role="img" aria-label="Distribusi cluster produk"></canvas>
+                                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+                                    <div class="mono" style="font-size:26px; font-weight:900; color:#f9fafb;" id="donut-total">—</div>
+                                    <div style="font-size:10px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Produk</div>
+                                </div>
+                            </div>
+                            <div class="flex-1 space-y-4 w-full">
+                                <div class="legend-row">
+                                    <div class="flex items-center gap-2">
+                                        <span class="legend-dot" style="background:#22c55e;"></span>
+                                        <span class="legend-label">Paling Laris</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="mini-bar-track hidden sm:block">
+                                            <div id="bar-paling" class="mini-bar-fill" style="background:#22c55e; width:0%;"></div>
+                                        </div>
+                                        <span class="legend-count" id="lbl-paling">—</span>
+                                        <span class="legend-pct" id="pct-paling"></span>
+                                    </div>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="flex items-center gap-2">
+                                        <span class="legend-dot" style="background:#fbbf24;"></span>
+                                        <span class="legend-label">Cukup Laris</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="mini-bar-track hidden sm:block">
+                                            <div id="bar-cukup" class="mini-bar-fill" style="background:#fbbf24; width:0%;"></div>
+                                        </div>
+                                        <span class="legend-count" id="lbl-cukup">—</span>
+                                        <span class="legend-pct" id="pct-cukup"></span>
+                                    </div>
+                                </div>
+                                <div class="legend-row">
+                                    <div class="flex items-center gap-2">
+                                        <span class="legend-dot" style="background:#f87171;"></span>
+                                        <span class="legend-label">Kurang Laris</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="mini-bar-track hidden sm:block">
+                                            <div id="bar-kurang" class="mini-bar-fill" style="background:#f87171; width:0%;"></div>
+                                        </div>
+                                        <span class="legend-count" id="lbl-kurang">—</span>
+                                        <span class="legend-pct" id="pct-kurang"></span>
+                                    </div>
+                                </div>
+                                <div style="padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); margin-top:4px;">
+                                    <p style="font-size:11px; color:rgba(255,255,255,0.25); line-height:1.6;">
+                                        Scatter plot & detail cluster tersedia di
+                                        <a href="hasil.html" style="color:#34d399; font-weight:600;">Hasil & Saran →</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saran -->
                     <div id="saran-section" class="hidden fade-up fade-up-4">
-                        <h3 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2">
-                            <i class="fas fa-lightbulb text-amber-500"></i> Saran Terkini
-                        </h3>
+                        <div style="font-size:15px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                            <div class="title-icon" style="background:rgba(245,158,11,0.15);">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            </div>
+                            Saran Terkini
+                        </div>
                         <div id="saran-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                     </div>
                 </div>
 
-                <div class="space-y-8">
+                <!-- KANAN -->
+                <div class="space-y-6">
                     <div id="riwayat-section" class="hidden fade-up fade-up-4">
-                         <h3 class="text-lg font-black text-gray-800 mb-6">Riwayat Upload</h3>
-                         <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-                            <div id="riwayat-list" class="divide-y divide-gray-50"></div>
-                         </div>
+                        <div style="font-size:15px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                            <div class="title-icon" style="background:rgba(255,255,255,0.06);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            Riwayat Upload
+                        </div>
+                        <div class="content-card" style="padding:0; overflow:hidden;">
+                            <div id="riwayat-list"></div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
 
+<script>
+function toggleCard(el) {
+    const allCards = document.querySelectorAll('.stat-card')
+    const isActive = el.classList.contains('active-card')
+    allCards.forEach(c => c.classList.remove('active-card'))
+    if (!isActive) el.classList.add('active-card')
+}
+</script>
+
 <script src="assets/js/config.js"></script>
 <script type="module">
-import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
-import { getAuth, onAuthStateChanged, signOut }
-  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-import { formatTanggal, formatRupiah, formatAngka, interpretasiSil, toast }
-  from './assets/js/utils.js'
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+import { formatTanggal, formatRupiah, formatAngka, interpretasiSil, toast } from './assets/js/utils.js'
 import { apiGetHasil, apiGetPivot, apiGetRiwayatUpload } from './assets/js/api.js'
 
 const app  = initializeApp(FIREBASE_CONFIG)
@@ -128,99 +531,187 @@ const auth = getAuth(app)
 
 window._logout = async () => { await signOut(auth); localStorage.clear(); location.href = 'index.html' }
 
+let donutInstance = null
+
 onAuthStateChanged(auth, async user => {
-  if (!user) { location.href = 'index.html'; return }
-  const token = await user.getIdToken(true)
-  localStorage.setItem('fb_token', token)
-  const nama = localStorage.getItem('user_nama') || 'Admin'
-  
-  document.getElementById('greeting-nama').textContent  = nama
-  document.getElementById('tanggal-el').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
-  loadDashboard()
+    if (!user) { location.href = 'index.html'; return }
+    const token = await user.getIdToken(true)
+    localStorage.setItem('fb_token', token)
+    const nama = localStorage.getItem('user_nama') || 'Admin'
+    document.getElementById('greeting-nama').textContent = nama
+    document.getElementById('tanggal-teks').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long', year:'numeric', month:'long', day:'numeric'})
+    loadDashboard()
 })
 
 async function loadDashboard() {
-  try {
-    const [hasilRes, pivotRes, riwayatRes] = await Promise.all([
-      apiGetHasil(), apiGetPivot(), apiGetRiwayatUpload()
-    ])
+    try {
+        const [hasilRes, pivotRes, riwayatRes] = await Promise.all([
+            apiGetHasil(), apiGetPivot(), apiGetRiwayatUpload()
+        ])
 
-    document.getElementById('stat-total').textContent = formatAngka(pivotRes.total || 0)
+        document.getElementById('stat-total').textContent = formatAngka(pivotRes.total || 0)
 
-    if (hasilRes.run && hasilRes.ringkasan) {
-      const r = hasilRes.run
-      const k = hasilRes.ringkasan
-      document.getElementById('stat-paling').textContent = k.paling_laris
-      document.getElementById('stat-cukup').textContent  = k.cukup_laris
-      document.getElementById('stat-kurang').textContent = k.kurang_laris
+        if (hasilRes.run && hasilRes.ringkasan) {
+            const r = hasilRes.run
+            const k = hasilRes.ringkasan
+            const paling = k.paling_laris || 0
+            const cukup  = k.cukup_laris  || 0
+            const kurang = k.kurang_laris  || 0
 
-      const sil = interpretasiSil(r.sil_score)
-      document.getElementById('info-clustering').innerHTML = `
-        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
-            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">SSE</div>
-            <div class="text-sm font-bold text-emerald-700 mono">${r.sse_final}</div>
-        </div>
-        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
-            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">Sil Score</div>
-            <div class="text-sm font-bold text-emerald-700 mono">${r.sil_score}</div>
-        </div>
-        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
-            <div class="text-[10px] font-black uppercase text-gray-400 mb-1">Iterasi</div>
-            <div class="text-sm font-bold text-emerald-700 mono">${r.iterasi}x</div>
-        </div>
-        <div class="bg-emerald-600 rounded-2xl p-4 text-center text-white shadow-lg shadow-emerald-100">
-            <div class="text-[10px] font-bold uppercase opacity-80 mb-1">Status</div>
-            <div class="text-[10px] font-black uppercase">${sil.label}</div>
-        </div>
-      `
+            document.getElementById('stat-paling').textContent = paling
+            document.getElementById('stat-cukup').textContent  = cukup
+            document.getElementById('stat-kurang').textContent = kurang
+
+            const sil = interpretasiSil(r.sil_score)
+            document.getElementById('info-clustering').innerHTML = `
+                <div class="metric-mini">
+                    <div class="metric-lbl">SSE</div>
+                    <div class="metric-val">${r.sse_final}</div>
+                    <div class="metric-sub">Jumlah kuadrat eror</div>
+                </div>
+                <div class="metric-mini">
+                    <div class="metric-lbl">Silhouette</div>
+                    <div class="metric-val" style="color:#34d399;">${r.sil_score}</div>
+                    <div class="metric-sub">Kualitas pemisahan</div>
+                </div>
+                <div class="metric-mini">
+                    <div class="metric-lbl">Iterasi</div>
+                    <div class="metric-val">${r.iterasi}×</div>
+                    <div class="metric-sub">Konvergensi</div>
+                </div>
+                <div class="status-badge">
+                    <div class="status-badge-lbl">Status</div>
+                    <div class="status-badge-val">${sil.label}</div>
+                    <div style="margin-top:8px; display:flex; justify-content:center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </div>
+            `
+
+            // Donut
+            const totalCluster = paling + cukup + kurang
+            document.getElementById('chart-section').classList.remove('hidden')
+            document.getElementById('donut-total').textContent = formatAngka(totalCluster)
+
+            const pct = n => totalCluster > 0 ? ((n/totalCluster)*100).toFixed(1)+'%' : '0%'
+            document.getElementById('lbl-paling').textContent = paling
+            document.getElementById('lbl-cukup').textContent  = cukup
+            document.getElementById('lbl-kurang').textContent = kurang
+            document.getElementById('pct-paling').textContent = pct(paling)
+            document.getElementById('pct-cukup').textContent  = pct(cukup)
+            document.getElementById('pct-kurang').textContent = pct(kurang)
+            document.getElementById('bar-paling').style.width = totalCluster > 0 ? (paling/totalCluster*100)+'%' : '0%'
+            document.getElementById('bar-cukup').style.width  = totalCluster > 0 ? (cukup/totalCluster*100)+'%' : '0%'
+            document.getElementById('bar-kurang').style.width = totalCluster > 0 ? (kurang/totalCluster*100)+'%' : '0%'
+
+            if (donutInstance) donutInstance.destroy()
+            donutInstance = new Chart(document.getElementById('donutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Paling Laris','Cukup Laris','Kurang Laris'],
+                    datasets: [{
+                        data: [paling, cukup, kurang],
+                        backgroundColor: ['#22c55e','#fbbf24','#f87171'],
+                        borderWidth: 4,
+                        borderColor: '#111827',
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '72%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1f2937',
+                            titleColor: '#f9fafb',
+                            bodyColor: 'rgba(255,255,255,0.6)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: ctx => '  ' + ctx.label + ': ' + ctx.raw + ' produk (' + pct(ctx.raw) + ')'
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        // Saran
+        if (hasilRes.saran?.length) {
+            document.getElementById('saran-section').classList.remove('hidden')
+            const cfgMap = {
+                green: {
+                    cls: 'saran-green',
+                    titleColor: '#86efac', bodyColor: 'rgba(134,239,172,0.7)',
+                    badgeStyle: 'background:rgba(22,163,74,0.2); color:#86efac; border:1px solid rgba(74,222,128,0.2);',
+                    iconStyle: 'background:rgba(22,163,74,0.2);',
+                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`
+                },
+                amber: {
+                    cls: 'saran-amber',
+                    titleColor: '#fde68a', bodyColor: 'rgba(253,230,138,0.7)',
+                    badgeStyle: 'background:rgba(217,119,6,0.2); color:#fde68a; border:1px solid rgba(251,191,36,0.2);',
+                    iconStyle: 'background:rgba(217,119,6,0.2);',
+                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
+                },
+                red: {
+                    cls: 'saran-red',
+                    titleColor: '#fca5a5', bodyColor: 'rgba(252,165,165,0.7)',
+                    badgeStyle: 'background:rgba(220,38,38,0.2); color:#fca5a5; border:1px solid rgba(252,165,165,0.2);',
+                    iconStyle: 'background:rgba(220,38,38,0.2);',
+                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+                }
+            }
+            document.getElementById('saran-container').innerHTML = hasilRes.saran.map(s => {
+                const cfg = cfgMap[s.warna] || cfgMap.green
+                return `
+                    <div class="saran-card ${cfg.cls}">
+                        <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; ${cfg.iconStyle}">${cfg.svg}</div>
+                            <div style="font-size:13px; font-weight:800; color:${cfg.titleColor}; line-height:1.4;">${s.judul}</div>
+                        </div>
+                        <p style="font-size:12px; color:${cfg.bodyColor}; line-height:1.6; margin-bottom:14px;">${s.isi}</p>
+                        <div style="font-size:10px; font-weight:700; padding:4px 12px; border-radius:8px; display:inline-block; ${cfg.badgeStyle}">${s.produk.length} Produk Terdeteksi</div>
+                    </div>
+                `
+            }).join('')
+        }
+
+        // Riwayat
+        if (riwayatRes?.length) {
+            document.getElementById('riwayat-section').classList.remove('hidden')
+            document.getElementById('riwayat-list').innerHTML = riwayatRes.slice(0,5).map(r => `
+                <div class="riwayat-item">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="riwayat-file-icon" style="background:${r.tipe_file==='pdf' ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)'};">
+                            ${r.tipe_file==='pdf'
+                                ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+                                : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`
+                            }
+                        </div>
+                        <div>
+                            <div class="riwayat-nama truncate" style="max-width:180px;">${r.nama_file}</div>
+                            <div class="riwayat-meta">${new Date(r.created_at).toLocaleDateString('id-ID')} · ${r.produk_unik} item</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+    } catch(e) {
+        console.error(e)
+        toast('Gagal memuat data: ' + e.message, 'error')
     }
-
-    if (hasilRes.saran?.length) {
-      document.getElementById('saran-section').classList.remove('hidden')
-      const borderMap = { green:'emerald-500', amber:'amber-500', red:'red-500' }
-      document.getElementById('saran-container').innerHTML = hasilRes.saran.map(s => `
-        <div class="bg-white border-l-4 border-${borderMap[s.warna]} rounded-2xl p-5 shadow-sm shadow-gray-100">
-          <div class="flex gap-3 items-center mb-3">
-            <span class="text-xl">${s.icon}</span>
-            <div class="text-sm font-black text-gray-800">${s.judul}</div>
-          </div>
-          <p class="text-xs text-gray-500 leading-relaxed mb-4">${s.isi}</p>
-          <div class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-lg inline-block">
-            ${s.produk.length} Produk Terdeteksi
-          </div>
-        </div>
-      `).join('')
-    }
-
-    if (riwayatRes?.length) {
-      document.getElementById('riwayat-section').classList.remove('hidden')
-      document.getElementById('riwayat-list').innerHTML = riwayatRes.slice(0,5).map((r,i) => `
-        <div class="p-4 hover:bg-gray-50 transition-colors">
-          <div class="flex items-center gap-3 mb-1">
-            <span class="text-lg">${r.tipe_file==='pdf'?'📄':'📊'}</span>
-            <div class="text-sm font-bold text-gray-700 truncate">${r.nama_file}</div>
-          </div>
-          <div class="text-[10px] text-gray-400 font-medium">
-            ${new Date(r.created_at).toLocaleDateString()} · ${r.produk_unik} Item
-          </div>
-        </div>
-      `).join('')
-    }
-  } catch(e) {
-    console.error(e)
-    toast('Gagal memuat data: ' + e.message, 'error')
-  }
 }
 </script>
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Pastikan path-nya sesuai posisi sw.js kamu
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
-        .catch(err => console.log('Gagal daftar SW:', err));
-    });
-  }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(r => console.log('SW ok', r))
+                .catch(e => console.log('SW fail', e))
+        })
+    }
 </script>
 </body>
 </html>

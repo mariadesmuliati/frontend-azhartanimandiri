@@ -1,5 +1,5 @@
+// assets/js/api.js
 // Semua komunikasi dengan backend Express
-// API_BASE diambil dari config.js yang dimuat sebelumnya
 
 function getToken() {
   return localStorage.getItem('fb_token') || ''
@@ -17,7 +17,7 @@ async function handleResponse(res) {
   return data
 }
 
-// ─── UPLOAD ───────────────────────────────
+// ─── UPLOAD ───────────────────────────────────────────────────────────────────
 export async function apiUploadFile(file, mode = 'replace') {
   const form = new FormData()
   form.append('file', file)
@@ -39,7 +39,29 @@ export async function apiGetPivot() {
   return handleResponse(res)
 }
 
-// ─── CLUSTERING ───────────────────────────
+// Hapus satu riwayat upload beserta pivot dan clustering terkait
+export async function apiHapusUpload(id, { hapusPivot = true, hapusClustering = true } = {}) {
+  const params = new URLSearchParams({
+    hapus_pivot     : hapusPivot,
+    hapus_clustering: hapusClustering,
+  })
+  const res = await fetch(`${API_BASE}/upload/riwayat/${id}?${params}`, {
+    method : 'DELETE',
+    headers: authHeaders(),
+  })
+  return handleResponse(res)
+}
+
+// Reset semua pivot tanpa hapus riwayat
+export async function apiResetPivot() {
+  const res = await fetch(`${API_BASE}/upload/pivot-semua`, {
+    method : 'DELETE',
+    headers: authHeaders(),
+  })
+  return handleResponse(res)
+}
+
+// ─── CLUSTERING ───────────────────────────────────────────────────────────────
 export async function apiJalankanClustering(centroids = null) {
   const res = await fetch(`${API_BASE}/clustering/jalankan`, {
     method : 'POST',
@@ -59,7 +81,7 @@ export async function apiGetRiwayatClustering() {
   return handleResponse(res)
 }
 
-// ─── AUTH ─────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
 export async function apiVerifyToken(idToken) {
   const res = await fetch(`${API_BASE}/auth/verify`, {
     method : 'POST',

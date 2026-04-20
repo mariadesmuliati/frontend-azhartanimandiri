@@ -8,142 +8,280 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="manifest" href="manifest.json">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script>
-    tailwind.config={theme:{extend:{colors:{teal:{'50':'#f0fdfa','100':'#ccfbf1','200':'#99f6e4','500':'#14b8a6','600':'#0d9488','700':'#0f766e'}}}}}
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    .bar-anim { transition: width 1s ease-in-out; }
-    .tbl-wrap::-webkit-scrollbar { width: 4px; }
-    .tbl-wrap::-webkit-scrollbar-thumb { background: #99f6e4; border-radius: 10px; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    aside { background: linear-gradient(180deg, #111827 0%, #0f1117 100%); border-right: 1px solid rgba(255,255,255,0.06); }
+    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); }
+    .nav-link { color: rgba(255,255,255,0.4); transition: all 0.2s; border-radius: 14px; }
+    .nav-link:hover { background: rgba(16,185,129,0.1); color: #34d399; }
+    .nav-link.active { background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15)); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+    .nav-link-logout { color: rgba(248,113,113,0.6); transition: all 0.2s; border-radius: 14px; }
+    .nav-link-logout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+    .content-card { background: rgba(17,24,39,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 24px; }
+    .title-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .content-card-title { color: #f9fafb; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+
+    /* Tabs */
+    .tab-bar { display: flex; gap: 4px; padding: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; width: fit-content; }
+    .tab-btn { padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); border: none; background: transparent; }
+    .tab-btn.active { background: rgba(5,150,105,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.04); }
+
+    /* Filter buttons */
+    .filter-btn { padding: 7px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+    .filter-btn.active { background: rgba(5,150,105,0.2); color: #34d399; border-color: rgba(52,211,153,0.3); }
+    .filter-btn:hover:not(.active) { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead tr { border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .data-table th { padding: 12px 16px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.07em; text-align: left; }
+    .data-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .data-table td { padding: 11px 16px; font-size: 12px; }
+    .search-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 9px 14px; color: #f9fafb; font-size: 13px; outline: none; transition: border-color 0.2s; flex: 1; min-width: 180px; }
+    .search-input:focus { border-color: rgba(52,211,153,0.35); }
+    .search-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* Cluster card */
+    .cluster-card { border-radius: 16px; border: 1px solid; overflow: hidden; display: flex; flex-direction: column; height: 420px; }
+    .cluster-green { background: linear-gradient(135deg, rgba(20,83,45,0.3), rgba(17,24,39,0.9)); border-color: rgba(74,222,128,0.2); }
+    .cluster-amber  { background: linear-gradient(135deg, rgba(120,53,15,0.3), rgba(17,24,39,0.9)); border-color: rgba(251,191,36,0.2); }
+    .cluster-red    { background: linear-gradient(135deg, rgba(127,29,29,0.3), rgba(17,24,39,0.9)); border-color: rgba(252,165,165,0.2); }
+    .cluster-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+    .cluster-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+    .cluster-item { padding: 9px 12px; border-radius: 10px; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; transition: background 0.15s; margin-bottom: 4px; }
+    .cluster-item:hover { background: rgba(255,255,255,0.06); }
+
+    /* Saran card */
+    .saran-card { border-radius: 16px; padding: 22px; border: 1px solid; transition: transform 0.2s; }
+    .saran-card:hover { transform: translateY(-2px); }
+    .saran-green { background: linear-gradient(135deg, rgba(20,83,45,0.4), rgba(22,101,52,0.2)); border-color: rgba(74,222,128,0.2); }
+    .saran-amber  { background: linear-gradient(135deg, rgba(120,53,15,0.4), rgba(146,64,14,0.2)); border-color: rgba(251,191,36,0.2); }
+    .saran-red    { background: linear-gradient(135deg, rgba(127,29,29,0.4), rgba(153,27,27,0.2)); border-color: rgba(252,165,165,0.2); }
+
+    /* Stat mini */
+    .stat-mini { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; }
+    .stat-mini-val { font-size: 18px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
+    .stat-mini-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+
+    /* Bar animated */
+    .bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
+    #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
+    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+    .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
+    .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
   </style>
 </head>
-<body class="bg-[#f8fafc] min-h-screen flex">
+<body class="min-h-screen flex">
 
-  <aside class="w-64 bg-white border-r border-teal-100 flex flex-col h-screen sticky top-0 z-50">
-    <div class="p-8 flex items-center gap-3">
-        <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-100">
-            <i class="fas fa-leaf text-white text-lg"></i>
+  <!-- SIDEBAR -->
+  <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+    <div class="p-6 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
+          <i class="fas fa-leaf text-white text-lg"></i>
         </div>
-        <span class="text-xl font-bold text-teal-800 tracking-tight">Azhar Tani</span>
+        <span class="text-lg font-bold tracking-tight" style="color:#f9fafb;">Azhar Tani</span>
+      </div>
     </div>
-    
-    <nav class="flex-1 px-4 space-y-2">
-        <a href="dashboard.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-th-large text-lg"></i> Dashboard
-        </a>
-        <a href="upload.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
-        </a>
-        <a href="clustering.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-braille text-lg"></i> Clustering
-        </a>
-        <a href="hasil.html" class="flex items-center gap-4 p-4 bg-teal-50 text-teal-600 rounded-2xl font-black text-sm shadow-sm">
-            <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
-        </a>
+    <nav class="flex-1 px-4 space-y-1 mt-2">
+      <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+      <a href="upload.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
+      <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
+      <a href="hasil.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
     </nav>
-
-    <div class="p-6">
-        <button onclick="_logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-sign-out-alt text-lg"></i> Keluar
-        </button>
+    <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
+      <button onclick="_logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
     </div>
   </aside>
 
+  <!-- MAIN -->
   <main class="flex-1 p-8 overflow-y-auto">
     <div id="toast-container"></div>
-    
     <div class="max-w-6xl mx-auto">
-      <div class="flex justify-between items-end mb-8">
+
+      <!-- Header -->
+      <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
         <div>
-            <h1 class="text-3xl font-black text-teal-900 mb-2">Hasil Clustering</h1>
-            <p class="text-sm text-gray-400 font-medium">Laporan segmentasi produk berdasarkan performa penjualan</p>
+          <h1 style="color:#f9fafb; font-size:28px; font-weight:900;">Hasil & Saran</h1>
+          <p style="color:rgba(255,255,255,0.35); font-size:14px; margin-top:4px;">Laporan segmentasi produk berdasarkan performa penjualan K-Means</p>
         </div>
-        <a href="clustering.html" class="text-xs bg-white border border-teal-200 text-teal-600 px-6 py-3 rounded-2xl font-black hover:bg-teal-50 transition shadow-sm">
-            <i class="fas fa-sync-alt mr-2"></i> Jalankan Ulang
+        <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); font-size:13px; font-weight:600; padding:9px 18px; border-radius:12px; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(52,211,153,0.4)';this.style.color='#34d399'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.6)'">
+          <i class="fas fa-sync-alt"></i> Jalankan Ulang
         </a>
       </div>
 
-      <div id="loading-state" class="text-center py-20 bg-white rounded-[3rem] border border-teal-50 shadow-sm mb-8">
-          <div class="inline-block animate-spin text-4xl mb-4 text-teal-500"><i class="fas fa-circle-notch"></i></div>
-          <div class="text-gray-400 font-bold">Menganalisis data...</div>
+      <!-- Loading -->
+      <div id="loading-state" class="content-card text-center" style="padding: 60px 20px;">
+        <div style="width:40px; height:40px; border:2px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px;"></div>
+        <div style="color:rgba(255,255,255,0.3); font-size:14px; font-weight:600;">Menganalisis data...</div>
+      </div>
+    
+      <!-- Empty -->
+      <div id="empty-state" class="hidden content-card text-center" style="padding: 60px 20px;">
+        <div style="width:64px; height:64px; background:rgba(255,255,255,0.04); border-radius:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div style="color:#f9fafb; font-size:18px; font-weight:800; margin-bottom:8px;">Belum ada hasil clustering</div>
+        <p style="color:rgba(255,255,255,0.35); font-size:13px; margin-bottom:20px;">Unggah data dan jalankan clustering terlebih dahulu</p>
+        <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:13px; font-weight:700; padding:12px 22px; border-radius:12px; text-decoration:none;">Mulai Sekarang →</a>
       </div>
 
-      <div id="empty-state" class="hidden text-center py-20 bg-white rounded-[3rem] border border-teal-50 shadow-sm mb-8">
-          <div class="text-6xl mb-6">📊</div>
-          <div class="text-gray-500 font-black text-xl mb-2">Belum ada hasil clustering</div>
-          <a href="clustering.html" class="inline-block bg-teal-600 text-white font-black px-8 py-4 rounded-2xl text-sm hover:opacity-90 transition shadow-lg shadow-teal-100">Mulai Sekarang</a>
-      </div>
+      <!-- Main content -->
+      <div id="main-content" class="hidden space-y-6">
 
-      <div id="main-content" class="hidden space-y-8">
-          <div id="validasi-chips" class="flex flex-wrap gap-4"></div>
+        <!-- Metric chips -->
+        <div id="validasi-chips" class="grid grid-cols-2 sm:grid-cols-4 gap-4 fade-up"></div>
 
-          <div class="flex gap-2 p-1.5 bg-white rounded-full border border-teal-50 w-fit shadow-sm">
-              <button onclick="showTab('tabel')" id="tab-tabel" class="px-6 py-2.5 rounded-full text-xs font-black transition-all bg-teal-600 text-white shadow-md">📋 Tabel Hasil</button>
-              <button onclick="showTab('cluster')" id="tab-cluster" class="px-6 py-2.5 rounded-full text-xs font-black transition-all text-gray-500 hover:bg-teal-50">📂 Per Cluster</button>
-              <button onclick="showTab('saran')" id="tab-saran" class="px-6 py-2.5 rounded-full text-xs font-black transition-all text-gray-500 hover:bg-teal-50">💡 Saran</button>
-              <button onclick="showTab('insight')" id="tab-insight" class="px-6 py-2.5 rounded-full text-xs font-black transition-all text-gray-500 hover:bg-teal-50">✨ Insight</button>
-          </div>
+        <!-- Tabs -->
+        <div class="tab-bar fade-up fade-up-1">
+          <button class="tab-btn active" onclick="showTab('grafik')" id="tab-grafik">
+            <i class="fas fa-chart-scatter mr-2"></i> Grafik
+          </button>
+          <button class="tab-btn" onclick="showTab('tabel')" id="tab-tabel">
+            <i class="fas fa-table mr-2"></i> Tabel
+          </button>
+          <button class="tab-btn" onclick="showTab('cluster')" id="tab-cluster">
+            <i class="fas fa-layer-group mr-2"></i> Per Cluster
+          </button>
+          <button class="tab-btn" onclick="showTab('saran')" id="tab-saran">
+            <i class="fas fa-lightbulb mr-2"></i> Saran
+          </button>
+        </div>
 
-          <div id="content-tabel" class="space-y-4">
-              <div class="flex flex-wrap gap-3 items-center bg-white p-4 rounded-3xl border border-teal-50 shadow-sm">
-                  <button onclick="setFilter('semua',this)" class="filter-btn px-5 py-2 rounded-xl text-xs font-black bg-teal-600 text-white">Semua</button>
-                  <button onclick="setFilter('paling',this)" class="filter-btn px-5 py-2 rounded-xl text-xs font-black bg-gray-50 text-gray-400 hover:text-teal-600">🏆 Paling</button>
-                  <button onclick="setFilter('cukup',this)" class="filter-btn px-5 py-2 rounded-xl text-xs font-black bg-gray-50 text-gray-400 hover:text-teal-600">📈 Cukup</button>
-                  <button onclick="setFilter('kurang',this)" class="filter-btn px-5 py-2 rounded-xl text-xs font-black bg-gray-50 text-gray-400 hover:text-red-500">⚠️ Kurang</button>
-                  <input id="inp-cari" oninput="filterTabel()" placeholder="Cari nama barang..." class="flex-1 bg-gray-50 border-none rounded-xl px-5 py-2 text-xs outline-none focus:ring-2 focus:ring-teal-500">
+        <!-- ═══ TAB GRAFIK ═══ -->
+        <div id="content-grafik" class="space-y-6 fade-up fade-up-2">
+
+          <!-- Scatter plot -->
+          <div class="content-card">
+            <div class="content-card-title">
+              <div class="title-icon" style="background:rgba(59,130,246,0.15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="17" cy="17" r="2"/><circle cx="7" cy="7" r="2"/></svg>
               </div>
-              <div class="bg-white rounded-[2.5rem] border border-teal-50 shadow-sm overflow-hidden">
-                  <div class="tbl-wrap overflow-x-auto">
-                      <table class="w-full text-left">
-                          <thead class="bg-gray-50/50 border-b border-teal-50">
-                              <tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                  <th class="px-6 py-4">No</th>
-                                  <th class="px-6 py-4">Nama Barang</th>
-                                  <th class="px-6 py-4">Qty</th>
-                                  <th class="px-6 py-4">Omset</th>
-                                  <th class="px-6 py-4">Cluster</th>
-                                  <th class="px-6 py-4">Kategori</th>
-                                  <th class="px-6 py-4">Silhouette</th>
-                              </tr>
-                          </thead>
-                          <tbody id="tbody-tabel" class="divide-y divide-teal-50/50"></tbody>
-                      </table>
-                  </div>
-              </div>
+              Scatter Plot — Qty vs Omset per Cluster
+              <span style="font-size:11px; color:rgba(255,255,255,0.25); font-weight:400;">Posisi produk dalam ruang 2D</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:14px;">
+              <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:rgba(255,255,255,0.5);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#22c55e; display:inline-block;"></span>Paling Laris
+              </span>
+              <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:rgba(255,255,255,0.5);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#fbbf24; display:inline-block;"></span>Cukup Laris
+              </span>
+              <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:rgba(255,255,255,0.5);">
+                <span style="width:10px; height:10px; border-radius:50%; background:#f87171; display:inline-block;"></span>Kurang Laris
+              </span>
+            </div>
+            <div style="position:relative; height:320px;">
+              <canvas id="scatterChart" role="img" aria-label="Scatter plot qty vs omset per cluster"></canvas>
+            </div>
           </div>
 
-          <div id="content-cluster" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div id="cluster-grid" class="contents"></div>
+          <!-- Bar chart omset + distribusi -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="content-card">
+              <div class="content-card-title">
+                <div class="title-icon" style="background:rgba(16,185,129,0.15);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                Top 10 Produk Omset Tertinggi
+              </div>
+              <div style="position:relative; height:280px;">
+                <canvas id="barOmsetChart" role="img" aria-label="Bar chart top 10 produk omset tertinggi"></canvas>
+              </div>
+            </div>
+
+            <div class="content-card">
+              <div class="content-card-title">
+                <div class="title-icon" style="background:rgba(245,158,11,0.15);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                </div>
+                Distribusi Cluster
+              </div>
+              <div style="position:relative; height:220px;">
+                <canvas id="distribusiChart" role="img" aria-label="Pie chart distribusi cluster"></canvas>
+              </div>
+              <div id="dist-legend" style="display:flex; flex-direction:column; gap:8px; margin-top:14px;"></div>
+            </div>
           </div>
 
-          <div id="content-saran" class="hidden space-y-6">
-              <div id="saran-list" class="grid grid-cols-1 gap-6"></div>
-              <div id="kesimpulan" class="p-8 rounded-[2.5rem] bg-teal-800 text-white shadow-xl shadow-teal-100"></div>
-          </div>
+          <!-- Silhouette per cluster + Statistik -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="content-card">
+              <div class="content-card-title">
+                <div class="title-icon" style="background:rgba(139,92,246,0.15);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                Rata-rata Silhouette per Cluster
+              </div>
+              <div style="position:relative; height:200px;">
+                <canvas id="silChart" role="img" aria-label="Bar chart silhouette score per cluster"></canvas>
+              </div>
+            </div>
 
-          <div id="content-insight" class="hidden space-y-6">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div class="bg-white p-8 rounded-[2.5rem] border border-teal-50 shadow-sm">
-                      <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-8">Top 5 Produk Omset Tertinggi</h3>
-                      <div id="bar-omset" class="space-y-6"></div>
-                  </div>
-                  <div class="bg-white p-8 rounded-[2.5rem] border border-teal-50 shadow-sm">
-                      <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-8">Distribusi Cluster</h3>
-                      <div id="bar-distribusi" class="space-y-6 mb-8"></div>
-                      <div id="insight-note" class="p-4 bg-teal-50 rounded-2xl text-[11px] font-bold text-teal-700 border border-teal-100"></div>
-                  </div>
+            <div class="content-card">
+              <div class="content-card-title">
+                <div class="title-icon" style="background:rgba(255,255,255,0.06);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                </div>
+                Statistik Keseluruhan
               </div>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div class="bg-white p-8 rounded-[2.5rem] border border-teal-50 shadow-sm">
-                      <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-8">Validasi Silhouette Per Cluster</h3>
-                      <div id="sil-per-cluster" class="space-y-4"></div>
-                  </div>
-                  <div class="bg-white p-8 rounded-[2.5rem] border border-teal-50 shadow-sm">
-                      <h3 class="text-xs font-black text-teal-800 uppercase tracking-widest mb-8">Statistik Data</h3>
-                      <div id="statistik" class="space-y-1"></div>
-                  </div>
-              </div>
+              <div id="statistik-list" class="space-y-3"></div>
+            </div>
           </div>
+        </div>
+
+        <!-- ═══ TAB TABEL ═══ -->
+        <div id="content-tabel" class="hidden space-y-4 fade-up">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
+            <button onclick="setFilter('semua',this)" class="filter-btn active">Semua</button>
+            <button onclick="setFilter('paling',this)" class="filter-btn">Paling Laris</button>
+            <button onclick="setFilter('cukup',this)" class="filter-btn">Cukup Laris</button>
+            <button onclick="setFilter('kurang',this)" class="filter-btn">Kurang Laris</button>
+            <input id="inp-cari" oninput="filterTabel()" placeholder="Cari nama barang..." class="search-input">
+          </div>
+          <div class="content-card" style="padding:0; overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Nama Barang</th>
+                    <th>Qty</th>
+                    <th>Omset</th>
+                    <th>Cluster</th>
+                    <th>Kategori</th>
+                    <th>Silhouette</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-tabel"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ TAB PER CLUSTER ═══ -->
+        <div id="content-cluster" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="cluster-grid"></div>
+        </div>
+
+        <!-- ═══ TAB SARAN ═══ -->
+        <div id="content-saran" class="hidden space-y-5 fade-up">
+          <div id="saran-list" class="space-y-4"></div>
+          <div id="kesimpulan" style="background:linear-gradient(135deg,#064e3b,#065f46); border:1px solid rgba(52,211,153,0.2); border-radius:20px; padding:28px;"></div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -158,184 +296,292 @@
     const app = initializeApp(FIREBASE_CONFIG); const auth = getAuth(app)
     window._logout = async () => { await signOut(auth); localStorage.clear(); location.href='index.html' }
 
-    let allData = []; let allSaran = []; let runData = null; let filterKat = 'semua'
+    let allData=[], allSaran=[], runData=null, filterKat='semua'
+    let chartScatter=null, chartBarOmset=null, chartDist=null, chartSil=null
 
     onAuthStateChanged(auth, async user => {
-        if (!user) { location.href='index.html'; return }
-        loadHasil()
+      if (!user) { location.href='index.html'; return }
+      loadHasil()
     })
 
     async function loadHasil() {
-        try {
-            const res = await apiGetHasil()
-            document.getElementById('loading-state').classList.add('hidden')
-            if (!res.hasil?.length) { document.getElementById('empty-state').classList.remove('hidden'); return }
-
-            allData = res.hasil; allSaran = res.saran; runData = res.run
-            document.getElementById('main-content').classList.remove('hidden')
-
-            renderValidasi(); renderTabel(allData); renderCluster(); renderSaran(); renderInsight()
-        } catch(e) {
-            document.getElementById('loading-state').classList.add('hidden')
-            toast('Gagal memuat hasil: ' + e.message, 'error')
-        }
+      try {
+        const res = await apiGetHasil()
+        document.getElementById('loading-state').classList.add('hidden')
+        if (!res.hasil?.length) { document.getElementById('empty-state').classList.remove('hidden'); return }
+        allData=res.hasil; allSaran=res.saran; runData=res.run
+        document.getElementById('main-content').classList.remove('hidden')
+        renderValidasi(); renderTabel(allData); renderCluster(); renderSaran()
+        setTimeout(renderGrafik, 150)
+      } catch(e) {
+        document.getElementById('loading-state').classList.add('hidden')
+        toast('Gagal memuat hasil: ' + e.message, 'error')
+      }
     }
 
     function renderValidasi() {
-        const sil = interpretasiSil(runData.sil_score)
-        document.getElementById('validasi-chips').innerHTML = `
-            <div class="bg-white p-5 rounded-3xl border border-teal-100 shadow-sm flex flex-col min-w-[140px]">
-                <span class="text-lg font-black text-teal-600 font-mono">${runData.sse_final}</span>
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">SSE Final</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-teal-100 shadow-sm flex flex-col min-w-[140px]">
-                <span class="text-lg font-black text-purple-600 font-mono">${runData.sil_score}</span>
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Silhouette</span>
-            </div>
-            <div class="bg-teal-600 p-5 rounded-3xl shadow-lg shadow-teal-100 flex flex-col min-w-[140px]">
-                <span class="text-lg font-black text-white uppercase">${sil.label}</span>
-                <span class="text-[9px] font-black text-teal-100 uppercase tracking-widest">${sil.icon} Status</span>
-            </div>
-        `
+      const sil = interpretasiSil(runData.sil_score)
+      const total = allData.length
+      const r = runData.ringkasan || {}
+      document.getElementById('validasi-chips').innerHTML = `
+        <div class="stat-mini">
+          <div class="stat-mini-val">${runData.sse_final}</div>
+          <div class="stat-mini-lbl">SSE Final</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val" style="color:#a78bfa;">${runData.sil_score}</div>
+          <div class="stat-mini-lbl">Silhouette Score</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val">${total}</div>
+          <div class="stat-mini-lbl">Total Produk</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#059669,#047857); border-radius:12px; padding:14px 16px;">
+          <div style="font-size:15px; font-weight:800; color:#fff;">${sil.label}</div>
+          <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px;">Status Kualitas</div>
+        </div>
+      `
+    }
+
+    function renderGrafik() {
+      const paling = allData.filter(d => d.kategori === 'paling laris')
+      const cukup  = allData.filter(d => d.kategori === 'cukup laris')
+      const kurang = allData.filter(d => d.kategori === 'kurang laris')
+
+      // ─── Scatter Plot ───
+      if (chartScatter) chartScatter.destroy()
+      chartScatter = new Chart(document.getElementById('scatterChart'), {
+        type: 'scatter',
+        data: {
+          datasets: [
+            { label:'Paling Laris', data: paling.map(d=>({x:d.qty_total, y:d.total_omset, nama:d.nama_barang})), backgroundColor:'rgba(34,197,94,0.7)', borderColor:'#22c55e', pointRadius:5, pointHoverRadius:8 },
+            { label:'Cukup Laris',  data: cukup.map(d=>({x:d.qty_total,  y:d.total_omset, nama:d.nama_barang})), backgroundColor:'rgba(251,191,36,0.7)', borderColor:'#fbbf24', pointRadius:5, pointHoverRadius:8 },
+            { label:'Kurang Laris', data: kurang.map(d=>({x:d.qty_total, y:d.total_omset, nama:d.nama_barang})), backgroundColor:'rgba(248,113,113,0.6)', borderColor:'#f87171', pointRadius:4, pointHoverRadius:7 },
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins: {
+            legend: { display:false },
+            tooltip: {
+              backgroundColor:'#1f2937', titleColor:'#f9fafb', bodyColor:'rgba(255,255,255,0.6)',
+              borderColor:'rgba(255,255,255,0.1)', borderWidth:1,
+              callbacks: {
+                title: ctx => ctx[0].raw.nama || '',
+                label: ctx => [`Qty: ${formatAngka(ctx.raw.x)}`, `Omset: ${formatRupiah(ctx.raw.y)}`]
+              }
+            }
+          },
+          scales: {
+            x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.35)', font:{size:11}}, title:{display:true, text:'Qty Total', color:'rgba(255,255,255,0.3)', font:{size:11}} },
+            y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.35)', font:{size:11}, callback:v=>formatRupiah(v)}, title:{display:true, text:'Total Omset', color:'rgba(255,255,255,0.3)', font:{size:11}} }
+          }
+        }
+      })
+
+      // ─── Bar Omset Top10 ───
+      const top10 = [...allData].sort((a,b)=>b.total_omset-a.total_omset).slice(0,10)
+      const colorMap = {'paling laris':'#22c55e','cukup laris':'#fbbf24','kurang laris':'#f87171'}
+      if (chartBarOmset) chartBarOmset.destroy()
+      chartBarOmset = new Chart(document.getElementById('barOmsetChart'), {
+        type: 'bar',
+        data: {
+          labels: top10.map(d => d.nama_barang.length>18 ? d.nama_barang.slice(0,18)+'…' : d.nama_barang),
+          datasets: [{
+            data: top10.map(d=>d.total_omset),
+            backgroundColor: top10.map(d=>colorMap[d.kategori]||'#60a5fa'),
+            borderRadius: 6, borderSkipped: false
+          }]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false, indexAxis:'y',
+          plugins: { legend:{display:false}, tooltip:{ backgroundColor:'#1f2937', titleColor:'#f9fafb', bodyColor:'rgba(255,255,255,0.6)', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, callbacks:{ label:ctx=>' '+formatRupiah(ctx.raw) } } },
+          scales: {
+            x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.3)', font:{size:10}, callback:v=>formatRupiah(v)} },
+            y: { grid:{display:false}, ticks:{color:'rgba(255,255,255,0.5)', font:{size:10}} }
+          }
+        }
+      })
+
+      // ─── Pie distribusi ───
+      const r = runData.ringkasan || {}
+      if (chartDist) chartDist.destroy()
+      chartDist = new Chart(document.getElementById('distribusiChart'), {
+        type: 'doughnut',
+        data: {
+          labels:['Paling Laris','Cukup Laris','Kurang Laris'],
+          datasets:[{ data:[r.paling_laris||0, r.cukup_laris||0, r.kurang_laris||0], backgroundColor:['#22c55e','#fbbf24','#f87171'], borderWidth:4, borderColor:'#111827', hoverOffset:6 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#1f2937',titleColor:'#f9fafb',bodyColor:'rgba(255,255,255,0.6)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1} } }
+      })
+      const total = allData.length
+      document.getElementById('dist-legend').innerHTML = [
+        { l:'Paling Laris', v:r.paling_laris||0, c:'#22c55e' },
+        { l:'Cukup Laris',  v:r.cukup_laris||0,  c:'#fbbf24' },
+        { l:'Kurang Laris', v:r.kurang_laris||0,  c:'#f87171' },
+      ].map(d=>`<div style="display:flex; align-items:center; justify-content:space-between; font-size:12px;">
+        <span style="display:flex; align-items:center; gap:7px; color:rgba(255,255,255,0.5);">
+          <span style="width:9px;height:9px;border-radius:50%;background:${d.c};flex-shrink:0;"></span>${d.l}
+        </span>
+        <span style="font-weight:700; color:#f9fafb; font-family:'JetBrains Mono',monospace;">${d.v} <span style="color:rgba(255,255,255,0.3); font-weight:400;">(${total>0?((d.v/total)*100).toFixed(1):'0'}%)</span></span>
+      </div>`).join('')
+
+      // ─── Silhouette per cluster ───
+      const silSetup = [
+        { cl:'c1', label:'Paling Laris', color:'#22c55e' },
+        { cl:'c2', label:'Cukup Laris',  color:'#fbbf24' },
+        { cl:'c3', label:'Kurang Laris', color:'#f87171' },
+      ]
+      const silAvg = silSetup.map(s=>{
+        const prod = allData.filter(d=>d.cluster===s.cl)
+        return prod.length ? prod.reduce((a,p)=>a+(p.silhouette||0),0)/prod.length : 0
+      })
+      if (chartSil) chartSil.destroy()
+      chartSil = new Chart(document.getElementById('silChart'), {
+        type:'bar',
+        data: { labels: silSetup.map(s=>s.label), datasets:[{ data:silAvg, backgroundColor:silSetup.map(s=>s.color), borderRadius:8, borderSkipped:false }] },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1f2937', titleColor:'#f9fafb', bodyColor:'rgba(255,255,255,0.6)', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, callbacks:{ label:ctx=>' Avg Silhouette: '+ctx.raw.toFixed(4) } } },
+          scales: {
+            x:{ grid:{display:false}, ticks:{color:'rgba(255,255,255,0.4)', font:{size:11}} },
+            y:{ min:0, max:1, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(255,255,255,0.3)', font:{size:10}} }
+          }
+        }
+      })
+
+      // ─── Statistik ───
+      document.getElementById('statistik-list').innerHTML = [
+        { l:'Total Qty', v: formatAngka(allData.reduce((s,d)=>s+d.qty_total,0)), color:'#34d399' },
+        { l:'Total Omset', v: formatRupiah(allData.reduce((s,d)=>s+d.total_omset,0)), color:'#60a5fa' },
+        { l:'Silhouette Score', v: runData.sil_score, color:'#a78bfa' },
+        { l:'Iterasi K-Means', v: (runData.iterasi||'—')+'×', color:'#fbbf24' },
+        { l:'SSE Final', v: runData.sse_final, color:'#f87171' },
+      ].map(s=>`
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <span style="font-size:12px; color:rgba(255,255,255,0.4); font-weight:500;">${s.l}</span>
+          <span style="font-size:13px; font-weight:700; color:${s.color}; font-family:'JetBrains Mono',monospace;">${s.v}</span>
+        </div>
+      `).join('')
     }
 
     function renderTabel(data) {
-        document.getElementById('tbody-tabel').innerHTML = data.map((d,i) => {
-            const w = warnaKategori(d.kategori); const wc = warnaCluster(d.cluster)
-            return `<tr class="text-xs font-bold text-gray-600 hover:bg-gray-50/50 transition">
-                <td class="px-6 py-4 text-gray-300 font-mono">${i+1}</td>
-                <td class="px-6 py-4 text-gray-800">${d.nama_barang}</td>
-                <td class="px-6 py-4 font-mono">${formatAngka(d.qty_total)}</td>
-                <td class="px-6 py-4 font-mono text-teal-700">${formatRupiah(d.total_omset)}</td>
-                <td class="px-6 py-4"><span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase" style="background:${wc}20;color:${wc}">${d.cluster}</span></td>
-                <td class="px-6 py-4" style="color:${w.text}">${d.kategori}</td>
-                <td class="px-6 py-4 font-mono font-black ${d.silhouette < 0 ? 'text-red-500' : 'text-teal-500'}">${d.silhouette?.toFixed(4)}</td>
-            </tr>`
-        }).join('')
+      const colorKat = { 'paling laris':'#22c55e', 'cukup laris':'#fbbf24', 'kurang laris':'#f87171' }
+      document.getElementById('tbody-tabel').innerHTML = data.map((d,i) => {
+        const c = colorKat[d.kategori] || '#60a5fa'
+        return `<tr>
+          <td style="color:rgba(255,255,255,0.2); font-family:'JetBrains Mono',monospace; font-size:11px;">${i+1}</td>
+          <td style="color:#f9fafb; font-weight:500;">${d.nama_barang}</td>
+          <td style="color:rgba(255,255,255,0.6); font-family:'JetBrains Mono',monospace;">${formatAngka(d.qty_total)}</td>
+          <td style="color:#34d399; font-family:'JetBrains Mono',monospace; font-weight:600;">${formatRupiah(d.total_omset)}</td>
+          <td><span style="padding:3px 10px; border-radius:8px; font-size:10px; font-weight:700; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5);">${d.cluster}</span></td>
+          <td><span style="padding:3px 10px; border-radius:8px; font-size:10px; font-weight:700; background:${c}18; color:${c};">${d.kategori}</span></td>
+          <td style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:${(d.silhouette||0)<0?'#f87171':'#34d399'};">${(d.silhouette||0).toFixed(4)}</td>
+        </tr>`
+      }).join('')
     }
 
     function renderCluster() {
-        const SETUP = [
-            { kat:'paling laris', icon:'🏆', color:'emerald' },
-            { kat:'cukup laris', icon:'📈', color:'amber' },
-            { kat:'kurang laris', icon:'⚠️', color:'red' }
-        ]
-        document.getElementById('cluster-grid').innerHTML = SETUP.map(s => {
-            const prod = allData.filter(d => d.kategori === s.kat)
-            return `<div class="bg-white rounded-[2.5rem] border border-teal-50 shadow-sm overflow-hidden flex flex-col h-[450px]">
-                <div class="p-6 bg-${s.color}-50 border-b border-${s.color}-100 flex justify-between items-center">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-${s.color}-700">${s.icon} ${s.kat}</span>
-                    <span class="bg-white px-3 py-1 rounded-full text-[9px] font-black text-${s.color}-600 border border-${s.color}-100">${prod.length}</span>
-                </div>
-                <div class="flex-1 overflow-y-auto p-4 space-y-2 tbl-wrap">
-                    ${prod.map(p => `<div class="p-3 bg-gray-50 rounded-xl text-[10px] font-bold text-gray-500 hover:bg-${s.color}-50 transition-colors">${p.nama_barang}</div>`).join('')}
-                </div>
-            </div>`
-        }).join('')
+      const setup = [
+        { kat:'paling laris', label:'Paling Laris', cls:'cluster-green', hc:'#86efac', badge:'rgba(34,197,94,0.15)', badgeText:'#86efac' },
+        { kat:'cukup laris',  label:'Cukup Laris',  cls:'cluster-amber', hc:'#fde68a', badge:'rgba(251,191,36,0.15)', badgeText:'#fde68a' },
+        { kat:'kurang laris', label:'Kurang Laris', cls:'cluster-red',   hc:'#fca5a5', badge:'rgba(248,113,113,0.15)', badgeText:'#fca5a5' },
+      ]
+      document.getElementById('cluster-grid').innerHTML = setup.map(s => {
+        const prod = allData.filter(d => d.kategori === s.kat)
+        return `<div class="cluster-card ${s.cls}">
+          <div class="cluster-header">
+            <span style="font-size:11px; font-weight:700; color:${s.hc}; text-transform:uppercase; letter-spacing:0.06em;">${s.label}</span>
+            <span style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:${s.badge}; color:${s.badgeText};">${prod.length} produk</span>
+          </div>
+          <div class="cluster-scroll">
+            ${prod.map(p=>`<div class="cluster-item">${p.nama_barang}</div>`).join('')}
+          </div>
+        </div>`
+      }).join('')
     }
 
     function renderSaran() {
-        const wMap = { green: 'emerald', amber: 'amber', red: 'red' }
-        document.getElementById('saran-list').innerHTML = allSaran.map(s => {
-            const c = wMap[s.warna]
-            return `<div class="bg-white p-8 rounded-[2.5rem] border-l-[12px] border-${c}-500 shadow-sm">
-                <div class="flex gap-4 items-center mb-4">
-                    <span class="text-3xl">${s.icon}</span>
-                    <h4 class="font-black text-gray-800 text-lg">${s.judul}</h4>
-                </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-6 font-medium">${s.isi}</p>
-                <div class="flex flex-wrap gap-2">
-                    ${s.produk.slice(0,10).map(p => `<span class="px-3 py-1.5 bg-gray-50 rounded-lg text-[9px] font-black text-gray-400 border border-gray-100">${p}</span>`).join('')}
-                    ${s.produk.length > 10 ? `<span class="text-[9px] font-bold text-gray-300 self-center">+${s.produk.length-10} lagi</span>` : ''}
-                </div>
-            </div>`
-        }).join('')
-        
-        const r = runData.ringkasan || {}
-        document.getElementById('kesimpulan').innerHTML = `<h3 class="text-xl font-black mb-3">📌 Kesimpulan Analisis</h3>
-            <p class="text-sm opacity-90 leading-relaxed font-medium">Hasil clustering menghasilkan <b>Silhouette Score ${runData.sil_score}</b>. Ditemukan <b>${r.paling_laris || 0} produk unggulan</b> dan <b>${r.kurang_laris || 0} produk</b> yang butuh perhatian stok segera.</p>`;
-    }
-
-    function renderInsight() {
-        const top5 = [...allData].sort((a,b)=>b.total_omset-a.total_omset).slice(0,5)
-        const maxO = top5[0]?.total_omset || 1
-        document.getElementById('bar-omset').innerHTML = top5.map(p => `
+      const cfgMap = {
+        green: {
+          cls:'saran-green', tc:'#86efac', bc:'rgba(134,239,172,0.6)',
+          bbg:'rgba(22,163,74,0.15)', bt:'#86efac', bb:'rgba(74,222,128,0.2)',
+          svg:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`
+        },
+        amber: {
+          cls:'saran-amber', tc:'#fde68a', bc:'rgba(253,230,138,0.6)',
+          bbg:'rgba(217,119,6,0.15)', bt:'#fde68a', bb:'rgba(251,191,36,0.2)',
+          svg:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
+        },
+        red: {
+          cls:'saran-red', tc:'#fca5a5', bc:'rgba(252,165,165,0.6)',
+          bbg:'rgba(220,38,38,0.15)', bt:'#fca5a5', bb:'rgba(252,165,165,0.2)',
+          svg:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+        }
+      }
+      document.getElementById('saran-list').innerHTML = allSaran.map(s => {
+        const cfg = cfgMap[s.warna] || cfgMap.green
+        return `<div class="saran-card ${cfg.cls}">
+          <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">${cfg.svg}</div>
             <div>
-                <div class="flex justify-between text-[10px] font-black text-gray-400 mb-2 uppercase tracking-tighter">
-                    <span class="truncate w-48">${p.nama_barang}</span>
-                    <span class="text-gray-800">${formatRupiah(p.total_omset)}</span>
-                </div>
-                <div class="h-3 bg-gray-50 rounded-full overflow-hidden"><div class="h-full bg-teal-500 rounded-full bar-anim" style="width:${(p.total_omset/maxO*100)}%"></div></div>
-            </div>`).join('')
+              <div style="font-size:15px; font-weight:800; color:${cfg.tc}; margin-bottom:4px;">${s.judul}</div>
+              <p style="font-size:13px; color:${cfg.bc}; line-height:1.6;">${s.isi}</p>
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+            ${s.produk.slice(0,12).map(p=>`<span style="padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600; background:${cfg.bbg}; color:${cfg.bt}; border:1px solid ${cfg.bb};">${p}</span>`).join('')}
+            ${s.produk.length>12?`<span style="font-size:11px; color:rgba(255,255,255,0.25); padding:4px 8px;">+${s.produk.length-12} lagi</span>`:''}
+          </div>
+          <div style="font-size:11px; font-weight:700; padding:5px 12px; border-radius:8px; display:inline-block; background:${cfg.bbg}; color:${cfg.bt}; border:1px solid ${cfg.bb};">${s.produk.length} Produk Terdeteksi</div>
+        </div>`
+      }).join('')
 
-        const total = allData.length; const r = runData.ringkasan || {}
-        const distData = [
-            { l:'🏆 Paling', v:r.paling_laris||0, c:'#10b981' },
-            { l:'📈 Cukup', v:r.cukup_laris||0, c:'#f59e0b' },
-            { l:'⚠️ Kurang', v:r.kurang_laris||0, c:'#ef4444' }
-        ]
-        document.getElementById('bar-distribusi').innerHTML = distData.map(d => `
-            <div>
-                <div class="flex justify-between text-[10px] font-black mb-2 uppercase tracking-widest text-gray-400">
-                    <span>${d.l}</span><span>${d.v} Produk</span>
-                </div>
-                <div class="h-3 bg-gray-50 rounded-full overflow-hidden"><div class="h-full bar-anim" style="width:${(d.v/total*100)}%;background:${d.c}"></div></div>
-            </div>`).join('')
-        document.getElementById('insight-note').innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${((r.kurang_laris/total)*100).toFixed(1)}% produk masuk kategori kurang laris.`
-
-        const SIL_SETUP = [{ cl:'c1', label:'C1 — Paling Laris', color:'#0d9488' },{ cl:'c2', label:'C2 — Cukup Laris', color:'#d97706' },{ cl:'c3', label:'C3 — Kurang Laris', color:'#dc2626' }]
-        document.getElementById('sil-per-cluster').innerHTML = SIL_SETUP.map(s => {
-            const prod = allData.filter(d => d.cluster === s.cl)
-            const avg = prod.length ? (prod.reduce((a,p)=>a+p.silhouette,0)/prod.length).toFixed(4) : '0.0000'
-            return `<div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-teal-50">
-                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">${s.label}</span>
-                <span class="text-sm font-black" style="color:${s.color}">${avg}</span>
-            </div>`
-        }).join('')
-
-        document.getElementById('statistik').innerHTML = [
-            { l:'Total Qty', v: formatAngka(allData.reduce((s,d)=>s+d.qty_total,0)) },
-            { l:'Total Omset', v: formatRupiah(allData.reduce((s,d)=>s+d.total_omset,0)) },
-            { l:'Silhouette Score', v: runData.sil_score }
-        ].map(s => `<div class="flex justify-between py-4 border-b border-gray-50 last:border-none">
-            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">${s.l}</span>
-            <span class="text-[11px] font-black text-gray-800 font-mono">${s.v}</span>
-        </div>`).join('')
+      const r = runData.ringkasan || {}
+      document.getElementById('kesimpulan').innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+          <div style="width:32px; height:32px; background:rgba(52,211,153,0.2); border-radius:9px; display:flex; align-items:center; justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <span style="font-size:15px; font-weight:700; color:#f9fafb;">Kesimpulan Analisis</span>
+        </div>
+        <p style="font-size:14px; color:rgba(255,255,255,0.7); line-height:1.7;">
+          Hasil clustering menghasilkan <strong style="color:#34d399;">Silhouette Score ${runData.sil_score}</strong>.
+          Ditemukan <strong style="color:#22c55e;">${r.paling_laris||0} produk unggulan</strong> yang perlu dipertahankan stoknya,
+          <strong style="color:#fbbf24;">${r.cukup_laris||0} produk</strong> berpotensi ditingkatkan dengan promosi, dan
+          <strong style="color:#f87171;">${r.kurang_laris||0} produk</strong> perlu evaluasi segera.
+        </p>
+      `
     }
 
-    window.showTab = function(tab) {
-        ['tabel','cluster','saran','insight'].forEach(t => {
-            document.getElementById(`content-${t}`).classList.toggle('hidden', t !== tab)
-            const btn = document.getElementById(`tab-${t}`)
-            btn.className = t === tab ? 'px-6 py-2.5 rounded-full text-xs font-black transition-all bg-teal-600 text-white shadow-md' : 'px-6 py-2.5 rounded-full text-xs font-black transition-all text-gray-500 hover:bg-teal-50'
-        })
-        if(tab === 'insight') setTimeout(renderInsight, 100)
+    window.showTab = tab => {
+      ['grafik','tabel','cluster','saran'].forEach(t => {
+        document.getElementById(`content-${t}`).classList.toggle('hidden', t!==tab)
+        const btn = document.getElementById(`tab-${t}`)
+        btn.classList.toggle('active', t===tab)
+      })
+      if (tab==='grafik') setTimeout(renderGrafik, 100)
     }
 
-    window.setFilter = function(kat, btn) {
-        filterKat = kat; document.querySelectorAll('.filter-btn').forEach(b => b.className = 'filter-btn px-5 py-2 rounded-xl text-xs font-black bg-gray-50 text-gray-400 hover:text-teal-600')
-        btn.className = 'filter-btn px-5 py-2 rounded-xl text-xs font-black bg-teal-600 text-white'; filterTabel()
+    window.setFilter = (kat, btn) => {
+      filterKat = kat
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      filterTabel()
     }
 
-    window.filterTabel = function() {
-        const cari = document.getElementById('inp-cari').value.toLowerCase()
-        let filtered = allData
-        if (filterKat === 'paling') filtered = filtered.filter(d => d.kategori === 'paling laris')
-        if (filterKat === 'cukup') filtered = filtered.filter(d => d.kategori === 'cukup laris')
-        if (filterKat === 'kurang') filtered = filtered.filter(d => d.kategori === 'kurang laris')
-        if (cari) filtered = filtered.filter(d => d.nama_barang?.toLowerCase().includes(cari))
-        renderTabel(filtered)
+    window.filterTabel = () => {
+      const cari = document.getElementById('inp-cari').value.toLowerCase()
+      let f = allData
+      if (filterKat==='paling') f=f.filter(d=>d.kategori==='paling laris')
+      if (filterKat==='cukup')  f=f.filter(d=>d.kategori==='cukup laris')
+      if (filterKat==='kurang') f=f.filter(d=>d.kategori==='kurang laris')
+      if (cari) f=f.filter(d=>d.nama_barang?.toLowerCase().includes(cari))
+      renderTabel(f)
     }
   </script>
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Pastikan path-nya sesuai posisi sw.js kamu
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
-        .catch(err => console.log('Gagal daftar SW:', err));
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'))
+  </script>
 </body>
 </html>

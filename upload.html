@@ -8,131 +8,270 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="manifest" href="manifest.json">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script>
-    tailwind.config={theme:{extend:{colors:{teal:{'50':'#f0fdfa','100':'#ccfbf1','200':'#99f6e4','500':'#14b8a6','600':'#0d9488','700':'#0f766e'}}}}}
-  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    aside { background: linear-gradient(180deg, #111827 0%, #0f1117 100%); border-right: 1px solid rgba(255,255,255,0.06); }
+    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); }
+    .nav-link { color: rgba(255,255,255,0.4); transition: all 0.2s; border-radius: 14px; }
+    .nav-link:hover { background: rgba(16,185,129,0.1); color: #34d399; }
+    .nav-link.active { background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15)); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+    .nav-link-logout { color: rgba(248,113,113,0.6); transition: all 0.2s; border-radius: 14px; }
+    .nav-link-logout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+    .chip-ai { background: rgba(5,150,105,0.15); border: 1px solid rgba(52,211,153,0.25); color: #34d399; border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .chip-ai-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse-dot 2s ease infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    .content-card { background: rgba(17,24,39,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 28px; }
+    .title-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Dropzone */
+    .dropzone {
+        border: 2px dashed rgba(16,185,129,0.25);
+        border-radius: 18px;
+        padding: 48px 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s;
+        background: rgba(16,185,129,0.03);
+    }
+    .dropzone:hover, .dropzone.drag-over {
+        border-color: rgba(52,211,153,0.6);
+        background: rgba(16,185,129,0.08);
+    }
+    .dropzone-icon {
+        width: 64px; height: 64px;
+        border-radius: 18px;
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(52,211,153,0.2);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+        transition: all 0.25s;
+    }
+    .dropzone:hover .dropzone-icon { background: rgba(16,185,129,0.2); }
+    .dropzone-title { color: #f9fafb; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .dropzone-sub { color: rgba(255,255,255,0.3); font-size: 12px; font-weight: 500; }
+
+    /* Mode buttons */
+    .mode-btn {
+        border-radius: 14px;
+        padding: 16px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+    }
+    .mode-btn:hover { border-color: rgba(52,211,153,0.3); background: rgba(16,185,129,0.06); }
+    .mode-btn.active { border-color: rgba(52,211,153,0.5); background: rgba(16,185,129,0.12); }
+    .mode-title { color: #f9fafb; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .mode-sub { color: rgba(255,255,255,0.35); font-size: 11px; }
+    .mode-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+
+    /* Upload button */
+    .btn-upload-main {
+        width: 100%;
+        background: linear-gradient(135deg, #059669, #047857);
+        color: #fff;
+        font-weight: 800;
+        font-size: 14px;
+        padding: 16px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 20px rgba(5,150,105,0.35);
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-upload-main:hover { box-shadow: 0 8px 32px rgba(5,150,105,0.5); transform: translateY(-1px); }
+    .btn-upload-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Success card */
+    .success-card {
+        background: linear-gradient(135deg, #064e3b, #065f46);
+        border: 1px solid rgba(52,211,153,0.25);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 4px 24px rgba(5,150,105,0.25);
+    }
+
+    /* Riwayat item */
+    .riwayat-item { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; }
+    .riwayat-item:last-child { border-bottom: none; }
+    .riwayat-item:hover { background: rgba(255,255,255,0.03); }
+
+    /* Format badge */
+    .format-step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .format-step:last-child { border-bottom: none; }
+    .format-num { width: 28px; height: 28px; border-radius: 8px; background: rgba(16,185,129,0.15); color: #34d399; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
+    #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
+    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+    .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
+    .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+    .toast-info { background:#1e3a5f; color:#93c5fd; border:1px solid rgba(147,197,253,0.3); }
+  </style>
 </head>
-<body class="bg-[#f8fafc] min-h-screen flex">
+<body class="min-h-screen flex">
 
-  <aside class="w-64 bg-white border-r border-teal-100 flex flex-col h-screen sticky top-0 z-50">
-    <div class="p-8 flex items-center gap-3">
-        <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-100">
-            <i class="fas fa-leaf text-white text-lg"></i>
+  <!-- SIDEBAR -->
+  <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+    <div class="p-6 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
+          <i class="fas fa-leaf text-white text-lg"></i>
         </div>
-        <span class="text-xl font-bold text-teal-800 tracking-tight">Azhar Tani</span>
+        <span class="text-lg font-bold tracking-tight" style="color:#f9fafb;">Azhar Tani</span>
+      </div>
     </div>
-    
-    <nav class="flex-1 px-4 space-y-2">
-        <a href="dashboard.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-th-large text-lg"></i> Dashboard
-        </a>
-        <a href="upload.html" class="flex items-center gap-4 p-4 bg-teal-50 text-teal-600 rounded-2xl font-black text-sm shadow-sm">
-            <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Data
-        </a>
-        <a href="clustering.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-braille text-lg"></i> Clustering
-        </a>
-        <a href="hasil.html" class="flex items-center gap-4 p-4 text-gray-400 hover:bg-teal-50 hover:text-teal-600 rounded-2xl transition-all font-bold text-sm">
-            <i class="fas fa-poll-h text-lg"></i> Hasil & Saran
-        </a>
+    <nav class="flex-1 px-4 space-y-1 mt-2">
+      <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+      <a href="upload.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
+      <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
+      <a href="hasil.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
     </nav>
-
-    <div class="p-6 mt-auto border-t border-gray-50">
-        <button onclick="window._logout()" class="flex items-center gap-4 p-4 w-full text-red-400 hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-bold text-sm group">
-            <i class="fas fa-sign-out-alt text-lg group-hover:translate-x-1 transition-transform"></i>
-            <span>Keluar</span>
-        </button>
+    <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
+      <button onclick="window._logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
     </div>
-</aside>
+  </aside>
 
+  <!-- MAIN -->
   <main class="flex-1 p-8 overflow-y-auto">
     <div id="toast-container"></div>
-
     <div class="max-w-5xl mx-auto">
-      <div class="mb-8">
-        <h1 class="text-3xl font-black text-teal-900 mb-2">Upload Data</h1>
-        <p class="text-sm text-gray-400 font-medium">Impor berkas Excel atau PDF untuk diproses ke database sistem</p>
+
+      <!-- Header -->
+      <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
+        <div>
+          <h1 style="color:#f9fafb; font-size:28px; font-weight:900;">Upload Data</h1>
+          <p style="color:rgba(255,255,255,0.35); font-size:14px; margin-top:4px;">Impor berkas Excel atau PDF untuk diproses ke database sistem</p>
+        </div>
+        <div class="chip-ai"><span class="chip-ai-dot"></span> Siap menerima data</div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="space-y-6">
-          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
-            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">📂 Area Unggah Berkas</h2>
-            
-            <div id="dropzone" 
-                 class="group border-2 border-dashed border-teal-100 rounded-[2rem] p-10 text-center cursor-pointer hover:border-teal-400 hover:bg-teal-50 transition-all mb-6"
-                 onclick="document.getElementById('inp-file').click()"
-                 ondragover="event.preventDefault();this.classList.add('bg-teal-50','border-teal-400')"
-                 ondragleave="this.classList.remove('bg-teal-50','border-teal-400')"
-                 ondrop="handleDrop(event)">
-              <div id="dz-icon" class="text-5xl mb-4 grayscale group-hover:grayscale-0 transition-all">📁</div>
-              <div id="dz-title" class="font-black text-gray-700 mb-1">Letakkan file di sini</div>
-              <div id="dz-sub" class="text-[11px] font-bold text-gray-300 uppercase tracking-tighter">XLSX, XLS, atau PDF (Maks 20MB)</div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- KIRI: Upload area -->
+        <div class="space-y-5">
+
+          <!-- Dropzone card -->
+          <div class="content-card fade-up fade-up-1">
+            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <div class="title-icon" style="background:rgba(16,185,129,0.15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              Area Unggah Berkas
+            </div>
+
+            <div id="dropzone" class="dropzone mb-5"
+              onclick="document.getElementById('inp-file').click()"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleDrop(event)">
+              <div class="dropzone-icon">
+                <svg id="dz-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><rect x="8" y="12" width="8" height="2" rx="1"/><rect x="8" y="16" width="5" height="2" rx="1"/></svg>
+              </div>
+              <div class="dropzone-title" id="dz-title">Letakkan file di sini atau klik untuk pilih</div>
+              <div class="dropzone-sub" id="dz-sub">Excel saja (.xlsx / .xls) · Maks 20MB · Auto-clean aktif</div>
               <input id="inp-file" type="file" accept=".xlsx,.xls,.pdf" class="hidden" onchange="pilihFile(this.files[0])">
             </div>
 
-            <div class="mb-8">
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Opsi Penggantian Data</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button id="btn-replace" onclick="setMode('replace')" class="flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all">
-                  <span class="text-lg mb-1">🔄</span>
-                  <span class="text-xs font-black">Ganti Data</span>
-                  <span class="text-[10px] opacity-60 font-medium">Hapus & timpa baru</span>
-                </button>
-                <button id="btn-append" onclick="setMode('append')" class="flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all">
-                  <span class="text-lg mb-1">➕</span>
-                  <span class="text-xs font-black">Tambah Data</span>
-                  <span class="text-[10px] opacity-60 font-medium">Gabung data lama</span>
-                </button>
+            <!-- Mode -->
+            <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px;">Opsi Penggantian Data</p>
+            <div class="grid grid-cols-2 gap-3 mb-5">
+              <div id="btn-replace" class="mode-btn active" onclick="setMode('replace')">
+                <div class="mode-icon" style="background:rgba(16,185,129,0.15);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </div>
+                <div class="mode-title">Ganti Data</div>
+                <div class="mode-sub">Hapus & timpa baru</div>
+              </div>
+              <div id="btn-append" class="mode-btn" onclick="setMode('append')">
+                <div class="mode-icon" style="background:rgba(59,130,246,0.12);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <div class="mode-title">Tambah Data</div>
+                <div class="mode-sub">Gabung data lama</div>
               </div>
             </div>
 
-            <div id="upload-error" class="hidden bg-red-50 border border-red-100 text-red-600 text-[11px] font-bold p-4 rounded-2xl mb-4"></div>
+            <div id="upload-error" class="hidden mb-4" style="background:rgba(127,29,29,0.3); border:1px solid rgba(248,113,113,0.2); color:#fca5a5; font-size:12px; font-weight:600; padding:12px 16px; border-radius:12px;"></div>
 
-            <button id="btn-upload" onclick="doUpload()" disabled class="w-full bg-teal-600 text-white font-black py-4 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-teal-100 disabled:opacity-30 disabled:shadow-none text-sm">
-              ▶ Mulai Proses Sinkronisasi
+            <button id="btn-upload" onclick="doUpload()" disabled class="btn-upload-main">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Mulai Proses Sinkronisasi
             </button>
           </div>
 
-          <div id="hasil-upload" class="hidden bg-emerald-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-emerald-100">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center font-black">✓</div>
-              <span class="text-xs font-black uppercase tracking-widest">Berhasil Diunggah</span>
+          <!-- Success -->
+          <div id="hasil-upload" class="hidden success-card fade-up">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+              <div style="width:32px; height:32px; background:rgba(52,211,153,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span style="font-size:13px; font-weight:700; color:#6ee7b7; text-transform:uppercase; letter-spacing:0.06em;">Berhasil Diunggah</span>
             </div>
             <div id="hasil-detail"></div>
-            <a href="clustering.html" class="mt-6 inline-block bg-white text-emerald-600 text-xs font-black px-6 py-3 rounded-xl hover:bg-emerald-50 transition-colors">⚙️ Menuju Clustering →</a>
+            <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; margin-top:16px; background:rgba(255,255,255,0.1); color:#f9fafb; font-size:13px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+              <i class="fas fa-cogs"></i> Menuju Clustering →
+            </a>
           </div>
         </div>
 
-        <div class="space-y-6">
-          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
-            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">📋 Standar Format</h2>
-            <div class="space-y-6">
-              <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xs font-black flex-shrink-0">1</div>
+        <!-- KANAN: Format info + Riwayat -->
+        <div class="space-y-5">
+
+          <!-- Format -->
+          <div class="content-card fade-up fade-up-2">
+            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <div class="title-icon" style="background:rgba(59,130,246,0.12);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              Standar Format
+            </div>
+            <div>
+              <div class="format-step">
+                <div class="format-num">1</div>
                 <div>
-                  <p class="text-xs font-black text-gray-800 mb-1">Struktur Kolom Utama</p>
-                  <div class="flex flex-wrap gap-2">
-                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Nama Barang</span>
-                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Qty</span>
-                    <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[10px] font-black uppercase tracking-tighter">Total</span>
+                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:8px;">Struktur Kolom Utama</p>
+                  <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Nama Barang</span>
+                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Qty</span>
+                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Total</span>
                   </div>
                 </div>
               </div>
-              <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xs font-black flex-shrink-0">2</div>
+              <div class="format-step">
+                <div class="format-num">2</div>
                 <div>
-                  <p class="text-xs font-black text-gray-800 mb-1">Ketentuan PDF</p>
-                  <p class="text-[11px] text-gray-400 leading-relaxed font-medium">Bukan berupa hasil scan/foto. Pastikan teks di PDF bisa disorot (selectable text) agar terbaca sistem.</p>
+                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:4px;">Auto-clean otomatis</p>
+                  <p style="font-size:12px; color:rgba(255,255,255,0.35); line-height:1.6;">File berantakan dari sistem kasir apapun langsung dibersihkan — baris kosong, baris total, format angka Rp, dan header ganda dibuang otomatis.</p>
+                </div>
+              </div>
+              <div class="format-step">
+                <div class="format-num">3</div>
+                <div>
+                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:4px;">Format & Ukuran</p>
+                  <p style="font-size:12px; color:rgba(255,255,255,0.35); line-height:1.6;">Hanya <strong style="color:#34d399;">.xlsx</strong> atau <strong style="color:#34d399;">.xls</strong> · Maksimal 20 MB · Multi-sheet didukung (sheet paling banyak data dipakai)</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-[2.5rem] border border-teal-50 p-8 shadow-sm">
-            <h2 class="text-sm font-black text-teal-800 uppercase tracking-widest mb-6">🕐 Riwayat Terakhir</h2>
-            <div id="riwayat-list" class="space-y-4">
-              <div class="text-xs text-gray-400 font-bold italic animate-pulse">Menghubungkan ke database...</div>
+          <!-- Riwayat -->
+          <div class="content-card fade-up fade-up-3">
+            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <div class="title-icon" style="background:rgba(255,255,255,0.06);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              Riwayat Upload Terakhir
+            </div>
+            <div id="riwayat-list">
+              <div style="font-size:12px; color:rgba(255,255,255,0.25); font-style:italic; text-align:center; padding:20px 0;">Menghubungkan ke database...</div>
             </div>
           </div>
         </div>
@@ -145,112 +284,145 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
     import { formatAngka, toast } from './assets/js/utils.js'
-    import { apiUploadFile, apiGetRiwayatUpload } from './assets/js/api.js'
+    import { apiUploadFile, apiGetRiwayatUpload, apiHapusUpload } from './assets/js/api.js'
 
-    const app = initializeApp(FIREBASE_CONFIG); 
-    const auth = getAuth(app);
+    const app = initializeApp(FIREBASE_CONFIG)
+    const auth = getAuth(app)
 
-    // Fungsi Logout Global
-    window._logout = async () => { 
-        if(confirm('Apakah Anda yakin ingin keluar?')) {
-            await signOut(auth); 
-            localStorage.clear(); 
-            location.href='index.html'; 
-        }
+    window._logout = async () => {
+      if (confirm('Yakin ingin keluar?')) { await signOut(auth); localStorage.clear(); location.href='index.html' }
     }
 
-    let selectedFile = null; 
-    let selectedMode = 'replace';
+    let selectedFile = null, selectedMode = 'replace'
 
     onAuthStateChanged(auth, async user => {
-        if (!user) { location.href='index.html'; return }
-        muatRiwayat()
+      if (!user) { location.href='index.html'; return }
+      muatRiwayat()
     })
 
-    window.handleDrop = (e) => {
-        e.preventDefault(); 
-        const file = e.dataTransfer.files[0]
-        if (file) pilihFile(file)
+    window.handleDrop = e => {
+      e.preventDefault()
+      const f = e.dataTransfer.files[0]
+      document.getElementById('dropzone').classList.remove('drag-over')
+      if (f) pilihFile(f)
     }
 
-    window.pilihFile = (file) => {
-        if (!file) return
-        if (!file.name.match(/\.(xlsx|xls|pdf)$/i)) { toast('Format tidak didukung!', 'error'); return }
-        selectedFile = file
-        const isPDF = file.name.toLowerCase().endsWith('.pdf')
-        document.getElementById('dz-icon').textContent = isPDF ? '📄' : '📊'; 
-        document.getElementById('dz-icon').classList.remove('grayscale')
-        document.getElementById('dz-title').textContent = file.name
-        document.getElementById('dz-sub').textContent = `${(file.size/1024/1024).toFixed(2)} MB • Klik ganti`
-        document.getElementById('btn-upload').disabled = false
+    window.pilihFile = file => {
+      if (!file) return
+      // Excel only — tolak PDF
+      if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        toast('Hanya file Excel (.xlsx / .xls) yang diterima', 'error')
+        return
+      }
+      selectedFile = file
+      document.getElementById('dz-title').textContent = file.name
+      document.getElementById('dz-sub').textContent = `${(file.size/1024/1024).toFixed(2)} MB · Klik untuk ganti`
+      document.getElementById('dz-svg').setAttribute('stroke', '#34d399')
+      document.getElementById('btn-upload').disabled = false
     }
 
-    window.setMode = (mode) => {
-        selectedMode = mode
-        const rBtn = document.getElementById('btn-replace'); 
-        const aBtn = document.getElementById('btn-append')
-        rBtn.className = mode === 'replace' ? 'flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all' : 'flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all'
-        aBtn.className = mode === 'append' ? 'flex flex-col p-4 rounded-2xl border-2 border-teal-500 bg-teal-50 text-teal-700 transition-all' : 'flex flex-col p-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 hover:border-teal-200 transition-all'
+    window.setMode = mode => {
+      selectedMode = mode
+      document.getElementById('btn-replace').classList.toggle('active', mode === 'replace')
+      document.getElementById('btn-append').classList.toggle('active', mode === 'append')
     }
 
     window.doUpload = async () => {
-        if (!selectedFile) return
-        const btn = document.getElementById('btn-upload'); 
-        btn.innerHTML = '⚙️ Sedang Memproses...'; 
-        btn.disabled = true
-        try {
-            const hasil = await apiUploadFile(selectedFile, selectedMode)
-            document.getElementById('hasil-upload').classList.remove('hidden')
-            document.getElementById('hasil-detail').innerHTML = `
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="bg-white/10 p-4 rounded-2xl">
-                        <div class="text-xl font-black font-mono">${formatAngka(hasil.valid_baris)}</div>
-                        <div class="text-[9px] font-black uppercase opacity-60">Baris Valid</div>
-                    </div>
-                    <div class="bg-white/10 p-4 rounded-2xl">
-                        <div class="text-xl font-black font-mono">${formatAngka(hasil.produk_unik)}</div>
-                        <div class="text-[9px] font-black uppercase opacity-60">Produk Unik</div>
-                    </div>
-                </div>
-                <p class="text-[11px] font-bold opacity-80">${hasil.pesan}</p>
-            `
-            toast('Berhasil!', 'success'); 
-            muatRiwayat()
-        } catch(e) {
-            document.getElementById('upload-error').textContent = '⚠ ' + e.message; 
-            document.getElementById('upload-error').classList.remove('hidden')
-            toast(e.message, 'error')
-        } finally { 
-            btn.innerHTML = '▶ Mulai Proses Sinkronisasi'; 
-            btn.disabled = false 
-        }
+      if (!selectedFile) return
+      const btn = document.getElementById('btn-upload')
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membersihkan & Memproses...'
+      btn.disabled = true
+      document.getElementById('upload-error').classList.add('hidden')
+      try {
+        const hasil = await apiUploadFile(selectedFile, selectedMode)
+        document.getElementById('hasil-upload').classList.remove('hidden')
+        document.getElementById('hasil-detail').innerHTML = `
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#f9fafb; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.total_baris)}</div>
+              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Total Baris</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#34d399; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.valid_baris)}</div>
+              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Baris Valid</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#60a5fa; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.produk_unik)}</div>
+              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Produk Unik</div>
+            </div>
+          </div>
+          ${hasil.dibuang > 0 ? `<div style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); border-radius:10px; margin-bottom:12px; font-size:12px; color:rgba(253,230,138,0.8);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            ${hasil.dibuang} baris dibuang otomatis (baris kosong / total / tidak lengkap)
+          </div>` : ''}
+          <p style="font-size:12px; color:rgba(255,255,255,0.55); line-height:1.6;">${hasil.pesan}</p>
+          ${hasil.sheet ? `<p style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:6px;">Sheet dibaca: <strong style="color:rgba(255,255,255,0.5);">${hasil.sheet}</strong></p>` : ''}
+        `
+        toast('Upload & auto-clean berhasil!', 'success')
+        muatRiwayat()
+      } catch(e) {
+        const errEl = document.getElementById('upload-error')
+        errEl.textContent = '⚠ ' + e.message
+        errEl.classList.remove('hidden')
+        toast(e.message, 'error')
+      } finally {
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Mulai Proses Sinkronisasi'
+        btn.disabled = false
+      }
+    }
+
+    // Hapus riwayat
+    window.hapusRiwayat = async (id, namaFile) => {
+      if (!confirm(`Hapus "${namaFile}"?\n\nData pivot dan hasil clustering terkait akan ikut dihapus.`)) return
+      try {
+        const hasil = await apiHapusUpload(id)
+        toast(`"${namaFile}" berhasil dihapus`, 'success')
+        muatRiwayat()
+      } catch(e) {
+        toast('Gagal menghapus: ' + e.message, 'error')
+      }
     }
 
     async function muatRiwayat() {
-        try {
-            const data = await apiGetRiwayatUpload()
-            document.getElementById('riwayat-list').innerHTML = data.length ? data.map(r => `
-                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <span class="text-2xl">${r.tipe_file==='pdf'?'📄':'📊'}</span>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-[11px] font-black text-gray-700 truncate">${r.nama_file}</div>
-                        <div class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">${new Date(r.created_at).toLocaleDateString('id-ID')} • ${r.valid_baris} Baris</div>
-                    </div>
-                </div>`).join('') : '<div class="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Belum ada aktivitas</div>'
-        } catch(e) { 
-            document.getElementById('riwayat-list').innerHTML = '<div class="text-red-400 text-[10px]">Error Database</div>' 
+      try {
+        const data = await apiGetRiwayatUpload()
+        if (!data.length) {
+          document.getElementById('riwayat-list').innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.2); text-align:center; padding:20px 0; font-style:italic;">Belum ada riwayat upload</div>'
+          return
         }
+        document.getElementById('riwayat-list').innerHTML = data.map(r => `
+          <div class="riwayat-item" style="padding:12px 14px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(59,130,246,0.12);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:12px; font-weight:600; color:rgba(255,255,255,0.8); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.nama_file}</div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.3); margin-top:2px;">
+                  ${new Date(r.created_at).toLocaleDateString('id-ID')} · ${formatAngka(r.valid_baris)} baris · ${formatAngka(r.produk_unik)} produk
+                  ${r.dibuang > 0 ? `<span style="color:rgba(251,191,36,0.5); margin-left:4px;">· ${r.dibuang} dibuang</span>` : ''}
+                </div>
+              </div>
+              <button
+                onclick="hapusRiwayat('${r.id}', '${r.nama_file.replace(/'/g,"\\'")}')"
+                title="Hapus file ini"
+                style="width:30px; height:30px; border-radius:8px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.15); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;"
+                onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.borderColor='rgba(248,113,113,0.4)'"
+                onmouseout="this.style.background='rgba(239,68,68,0.08)'; this.style.borderColor='rgba(239,68,68,0.15)'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              </button>
+            </div>
+          </div>
+        `).join('')
+      } catch(e) {
+        document.getElementById('riwayat-list').innerHTML = '<div style="font-size:12px; color:#f87171; padding:12px;">Error memuat riwayat</div>'
+      }
     }
   </script>
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Pastikan path-nya sesuai posisi sw.js kamu
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker berhasil didaftarkan!', reg))
-        .catch(err => console.log('Gagal daftar SW:', err));
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'))
+    }
+  </script>
 </body>
 </html>
