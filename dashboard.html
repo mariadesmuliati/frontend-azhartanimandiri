@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard — ClusterToko</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="manifest" href="manifest.json">
@@ -15,7 +15,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #0f1117;
@@ -24,22 +24,143 @@
                 linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
             background-size: 40px 40px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* ── SIDEBAR ── */
+        /* ══════════════════════════════════
+           LAYOUT WRAPPER
+        ══════════════════════════════════ */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ══════════════════════════════════
+           SIDEBAR — DESKTOP
+        ══════════════════════════════════ */
         aside {
+            width: 256px;
+            flex-shrink: 0;
             background: linear-gradient(180deg, #111827 0%, #0f1117 100%);
             border-right: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: transform 0.3s ease;
         }
+
+        /* ══════════════════════════════════
+           SIDEBAR — MOBILE (HIDDEN BY DEFAULT)
+        ══════════════════════════════════ */
+        @media (max-width: 768px) {
+            aside {
+                position: fixed;
+                top: 0; left: 0;
+                height: 100vh;
+                width: 240px;
+                transform: translateX(-100%);
+                z-index: 200;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+            }
+            aside.sidebar-open {
+                transform: translateX(0);
+            }
+        }
+
+        /* ══════════════════════════════════
+           OVERLAY (mobile sidebar backdrop)
+        ══════════════════════════════════ */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 199;
+            backdrop-filter: blur(2px);
+        }
+        #sidebar-overlay.active { display: block; }
+
+        /* ══════════════════════════════════
+           TOPBAR — MOBILE ONLY
+        ══════════════════════════════════ */
+        .mobile-topbar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #111827;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+        }
+        @media (max-width: 768px) {
+            .mobile-topbar { display: flex; }
+        }
+
+        .hamburger-btn {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: rgba(255,255,255,0.7);
+            flex-shrink: 0;
+        }
+        .hamburger-btn:active { background: rgba(255,255,255,0.12); }
+
+        .topbar-brand {
+            display: flex; align-items: center; gap: 8px;
+            flex: 1;
+        }
+
+        /* ══════════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════════ */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-width: 0;
+        }
+
+        .main-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        @media (max-width: 768px) {
+            .main-inner {
+                padding: 16px;
+            }
+        }
+
+        /* ══════════════════════════════════
+           NAV STYLES
+        ══════════════════════════════════ */
         .nav-logo-ring {
             background: linear-gradient(135deg, #059669, #047857);
             box-shadow: 0 0 20px rgba(5,150,105,0.4);
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
         }
         .nav-link {
             color: rgba(255,255,255,0.4);
             transition: all 0.2s;
             border-radius: 14px;
+            display: flex; align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
         }
         .nav-link:hover {
             background: rgba(16,185,129,0.1);
@@ -49,33 +170,59 @@
             background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15));
             color: #34d399;
             border: 1px solid rgba(52,211,153,0.2);
+            font-weight: 600;
         }
         .nav-link-logout {
             color: rgba(248,113,113,0.6);
             transition: all 0.2s;
             border-radius: 14px;
+            display: flex; align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
         }
         .nav-link-logout:hover {
             background: rgba(239,68,68,0.1);
             color: #f87171;
         }
-        .brand-name { color: #f9fafb; }
+        .brand-name { color: #f9fafb; font-size: 16px; font-weight: 700; }
         .sidebar-divider { border-color: rgba(255,255,255,0.06); }
 
-        /* ── HEADER ── */
+        /* ══════════════════════════════════
+           HEADER
+        ══════════════════════════════════ */
         .header-title { color: #f9fafb; }
         .header-sub { color: rgba(255,255,255,0.35); }
+
+        .header-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+            .header-row { margin-bottom: 16px; }
+            .header-title { font-size: 20px !important; }
+        }
+
         .chip-ai {
             background: rgba(5,150,105,0.15);
             border: 1px solid rgba(52,211,153,0.25);
             color: #34d399;
             border-radius: 20px;
-            padding: 7px 16px;
-            font-size: 13px;
+            padding: 7px 14px;
+            font-size: 12px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 7px;
+            display: flex; align-items: center; gap: 7px;
+            white-space: nowrap;
         }
         .chip-ai-dot {
             width: 7px; height: 7px;
@@ -83,6 +230,7 @@
             background: #10b981;
             box-shadow: 0 0 8px #10b981;
             animation: pulse-dot 2s ease infinite;
+            flex-shrink: 0;
         }
         @keyframes pulse-dot {
             0%,100% { opacity:1; transform:scale(1); }
@@ -93,424 +241,496 @@
             border: 1px solid rgba(255,255,255,0.1);
             color: rgba(255,255,255,0.6);
             border-radius: 20px;
-            padding: 7px 16px;
-            font-size: 13px;
+            padding: 7px 14px;
+            font-size: 12px;
             font-weight: 600;
+            display: flex; align-items: center; gap: 7px;
+            white-space: nowrap;
+        }
+        .chips-row {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 480px) {
+            .chip-date { display: none; }
         }
 
-        /* ── STAT CARDS ── */
+        /* ══════════════════════════════════
+           STAT CARDS GRID
+        ══════════════════════════════════ */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+
         .stat-card {
-            border-radius: 20px;
-            padding: 24px;
+            border-radius: 18px;
+            padding: 18px;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
             position: relative;
             overflow: hidden;
             border: 1px solid transparent;
         }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            opacity: 0;
-            transition: opacity 0.25s;
-        }
-        .stat-card:hover { transform: translateY(-4px); }
-        .stat-card:active { transform: translateY(-1px) scale(0.98); }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card:active { transform: scale(0.97); }
 
-        /* Card Total - emerald */
-        .card-total {
-            background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
-            border-color: rgba(52,211,153,0.2);
-            box-shadow: 0 4px 24px rgba(5,150,105,0.25);
+        @media (max-width: 480px) {
+            .stat-card { padding: 14px; border-radius: 14px; }
         }
-        .card-total:hover { box-shadow: 0 12px 40px rgba(5,150,105,0.4); border-color: rgba(52,211,153,0.4); }
-        .card-total.active-card { background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 16px 48px rgba(16,185,129,0.5); }
 
-        /* Card Paling Laris - green */
-        .card-paling {
-            background: linear-gradient(135deg, #14532d 0%, #166534 60%, #15803d 100%);
-            border-color: rgba(74,222,128,0.2);
-            box-shadow: 0 4px 24px rgba(22,101,52,0.3);
-        }
-        .card-paling:hover { box-shadow: 0 12px 40px rgba(22,163,74,0.45); border-color: rgba(74,222,128,0.4); }
-        .card-paling.active-card { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); box-shadow: 0 16px 48px rgba(34,197,94,0.5); }
+        .card-total  { background: linear-gradient(135deg,#064e3b,#047857); border-color:rgba(52,211,153,0.2); box-shadow:0 4px 20px rgba(5,150,105,0.25); }
+        .card-paling { background: linear-gradient(135deg,#14532d,#15803d); border-color:rgba(74,222,128,0.2);  box-shadow:0 4px 20px rgba(22,101,52,0.3); }
+        .card-cukup  { background: linear-gradient(135deg,#78350f,#b45309); border-color:rgba(251,191,36,0.2);  box-shadow:0 4px 20px rgba(120,53,15,0.35); }
+        .card-kurang { background: linear-gradient(135deg,#7f1d1d,#b91c1c); border-color:rgba(252,165,165,0.2); box-shadow:0 4px 20px rgba(127,29,29,0.35); }
 
-        /* Card Cukup Laris - amber */
-        .card-cukup {
-            background: linear-gradient(135deg, #78350f 0%, #92400e 60%, #b45309 100%);
-            border-color: rgba(251,191,36,0.2);
-            box-shadow: 0 4px 24px rgba(120,53,15,0.35);
-        }
-        .card-cukup:hover { box-shadow: 0 12px 40px rgba(217,119,6,0.45); border-color: rgba(251,191,36,0.4); }
-        .card-cukup.active-card { background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); box-shadow: 0 16px 48px rgba(251,191,36,0.5); }
-
-        /* Card Kurang Laris - red */
-        .card-kurang {
-            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 60%, #b91c1c 100%);
-            border-color: rgba(252,165,165,0.2);
-            box-shadow: 0 4px 24px rgba(127,29,29,0.35);
-        }
-        .card-kurang:hover { box-shadow: 0 12px 40px rgba(220,38,38,0.45); border-color: rgba(252,165,165,0.4); }
-        .card-kurang.active-card { background: linear-gradient(135deg, #dc2626 0%, #f87171 100%); box-shadow: 0 16px 48px rgba(248,113,113,0.5); }
+        .card-total:hover  { box-shadow:0 12px 36px rgba(5,150,105,0.4);   border-color:rgba(52,211,153,0.4); }
+        .card-paling:hover { box-shadow:0 12px 36px rgba(22,163,74,0.45);  border-color:rgba(74,222,128,0.4); }
+        .card-cukup:hover  { box-shadow:0 12px 36px rgba(217,119,6,0.45);  border-color:rgba(251,191,36,0.4); }
+        .card-kurang:hover { box-shadow:0 12px 36px rgba(220,38,38,0.45);  border-color:rgba(252,165,165,0.4); }
 
         .stat-icon {
-            width: 44px; height: 44px;
-            border-radius: 12px;
+            width: 36px; height: 36px;
+            border-radius: 10px;
             background: rgba(255,255,255,0.12);
             display: flex; align-items: center; justify-content: center;
-            margin-bottom: 16px;
-            backdrop-filter: blur(4px);
+            margin-bottom: 12px;
         }
-        .stat-num { font-size: 36px; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 4px; }
-        .stat-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; }
-        .stat-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 8px; font-weight: 500; }
-        .stat-glow {
-            position: absolute;
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.06);
-            top: -20px; right: -20px;
-            pointer-events: none;
+        @media (max-width: 480px) {
+            .stat-icon { width: 30px; height: 30px; margin-bottom: 8px; }
+            .stat-icon svg { width: 15px; height: 15px; }
         }
 
-        /* ── CONTENT CARDS ── */
+        .stat-num {
+            font-size: 32px; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        @media (max-width: 480px) { .stat-num { font-size: 22px; } }
+
+        .stat-label {
+            font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6);
+            text-transform: uppercase; letter-spacing: 0.07em;
+        }
+        .stat-sub {
+            font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 6px; font-weight: 500;
+        }
+        @media (max-width: 480px) { .stat-sub { display: none; } }
+
+        .stat-glow {
+            position: absolute; width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); top: -16px; right: -16px; pointer-events: none;
+        }
+
+        /* ══════════════════════════════════
+           MAIN GRID (left + right)
+        ══════════════════════════════════ */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+        @media (max-width: 1024px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ══════════════════════════════════
+           CONTENT CARDS
+        ══════════════════════════════════ */
         .content-card {
             background: rgba(17,24,39,0.8);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 20px;
-            padding: 28px;
+            border-radius: 18px;
+            padding: 22px;
             backdrop-filter: blur(12px);
         }
         .content-card-title {
-            color: #f9fafb;
-            font-size: 15px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            color: #f9fafb; font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
         }
         .title-icon {
-            width: 30px; height: 30px;
-            border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
-        /* ── METRIC MINI ── */
+        /* ══════════════════════════════════
+           METRIC MINI
+        ══════════════════════════════════ */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        @media (max-width: 600px) {
+            .metric-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         .metric-mini {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
+            border-radius: 12px; padding: 14px; text-align: center;
             transition: all 0.2s;
         }
-        .metric-mini:hover {
-            background: rgba(255,255,255,0.07);
-            border-color: rgba(255,255,255,0.12);
-        }
-        .metric-val { font-size: 18px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
-        .metric-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-        .metric-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 4px; }
+        .metric-mini:hover { background: rgba(255,255,255,0.07); }
+        .metric-val { font-size: 16px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
+        .metric-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+        .metric-sub { font-size: 9px; color: rgba(255,255,255,0.25); margin-top: 3px; }
 
         .status-badge {
-            background: linear-gradient(135deg, #059669, #047857);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(5,150,105,0.35);
+            background: linear-gradient(135deg,#059669,#047857);
+            border-radius: 12px; padding: 14px; text-align: center;
+            box-shadow: 0 4px 16px rgba(5,150,105,0.35);
         }
-        .status-badge-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+        .status-badge-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
         .status-badge-val { font-size: 13px; font-weight: 800; color: #fff; }
 
-        /* ── DONUT LEGEND ── */
-        .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .legend-label { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
-        .legend-count { font-size: 14px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
+        /* ══════════════════════════════════
+           DONUT CHART SECTION
+        ══════════════════════════════════ */
+        .donut-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 24px;
+        }
+        @media (max-width: 480px) {
+            .donut-wrapper { flex-direction: column; align-items: center; }
+        }
+
+        .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .legend-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .legend-count { font-size: 13px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
         .legend-pct { font-size: 11px; color: rgba(255,255,255,0.3); width: 40px; text-align: right; }
-        .mini-bar-track { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.06); max-width: 80px; }
+        .mini-bar-track { flex: 1; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.06); max-width: 70px; }
         .mini-bar-fill { height: 100%; border-radius: 3px; }
 
-        /* ── SARAN CARDS ── */
+        /* ══════════════════════════════════
+           SARAN
+        ══════════════════════════════════ */
+        .saran-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 600px) {
+            .saran-grid { grid-template-columns: 1fr; }
+        }
+
         .saran-card {
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid;
-            transition: all 0.2s;
-            cursor: default;
+            border-radius: 14px; padding: 16px; border: 1px solid;
+            transition: all 0.2s; cursor: default;
         }
         .saran-card:hover { transform: translateY(-2px); }
-        .saran-green { background: linear-gradient(135deg, rgba(20,83,45,0.5), rgba(22,101,52,0.3)); border-color: rgba(74,222,128,0.2); }
-        .saran-amber { background: linear-gradient(135deg, rgba(120,53,15,0.5), rgba(146,64,14,0.3)); border-color: rgba(251,191,36,0.2); }
-        .saran-red   { background: linear-gradient(135deg, rgba(127,29,29,0.5), rgba(153,27,27,0.3)); border-color: rgba(252,165,165,0.2); }
+        .saran-green { background: linear-gradient(135deg,rgba(20,83,45,0.5),rgba(22,101,52,0.3)); border-color:rgba(74,222,128,0.2); }
+        .saran-amber { background: linear-gradient(135deg,rgba(120,53,15,0.5),rgba(146,64,14,0.3)); border-color:rgba(251,191,36,0.2); }
+        .saran-red   { background: linear-gradient(135deg,rgba(127,29,29,0.5),rgba(153,27,27,0.3)); border-color:rgba(252,165,165,0.2); }
 
-        /* ── RIWAYAT ── */
+        /* ══════════════════════════════════
+           RIWAYAT
+        ══════════════════════════════════ */
         .riwayat-item {
-            padding: 14px 16px;
+            padding: 12px 16px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             transition: background 0.15s;
         }
         .riwayat-item:last-child { border-bottom: none; }
         .riwayat-item:hover { background: rgba(255,255,255,0.03); }
         .riwayat-file-icon {
-            width: 34px; height: 34px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .riwayat-nama { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); }
-        .riwayat-meta { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+        .riwayat-nama { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
+        .riwayat-meta { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
 
-        /* ── SCROLLBAR ── */
-        ::-webkit-scrollbar { width: 5px; }
+        /* ══════════════════════════════════
+           SCROLLBAR
+        ══════════════════════════════════ */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0f1117; }
         ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
 
-        /* ── ANIMATIONS ── */
-        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        .fade-up { animation: fadeUp 0.4s ease both; }
+        /* ══════════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════════ */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up   { animation: fadeUp 0.4s ease both; }
         .fade-up-1 { animation-delay: 0.06s; }
         .fade-up-2 { animation-delay: 0.12s; }
         .fade-up-3 { animation-delay: 0.18s; }
         .fade-up-4 { animation-delay: 0.24s; }
 
-        /* toast */
+        /* ══════════════════════════════════
+           TOAST
+        ══════════════════════════════════ */
         #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
-        .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+        .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:300px; animation:fadeUp .3s ease; }
         .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
         .toast-error   { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
         .toast-info    { background:#1e3a5f; color:#93c5fd; border:1px solid rgba(147,197,253,0.3); }
     </style>
 </head>
-<body class="min-h-screen flex">
+<body>
+
+<!-- OVERLAY (klik untuk tutup sidebar di mobile) -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-wrapper">
 
     <!-- ═══════════════ SIDEBAR ═══════════════ -->
-    <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+    <aside id="sidebar">
         <div class="p-6 pb-4">
             <div class="flex items-center gap-3">
-                <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-leaf text-white text-lg"></i>
+                <div class="nav-logo-ring">
+                    <i class="fas fa-leaf text-white text-base"></i>
                 </div>
-                <span class="text-lg font-bold brand-name tracking-tight">Azhar Tani</span>
+                <span class="brand-name">Azhar Tani</span>
             </div>
         </div>
 
         <nav class="flex-1 px-4 space-y-1 mt-2">
-            <a href="dashboard.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm">
+            <a href="dashboard.html" class="nav-link active">
                 <i class="fas fa-th-large w-4 text-center"></i> Dashboard
             </a>
-            <a href="upload.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+            <a href="upload.html" class="nav-link">
                 <i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data
             </a>
-            <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+            <a href="clustering.html" class="nav-link">
                 <i class="fas fa-braille w-4 text-center"></i> Clustering
             </a>
-            <a href="hasil.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm">
+            <a href="hasil.html" class="nav-link">
                 <i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran
             </a>
         </nav>
 
         <div class="p-4 sidebar-divider border-t">
-            <button onclick="_logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm">
+            <button onclick="_logout()" class="nav-link-logout">
                 <i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar
             </button>
         </div>
     </aside>
 
-    <!-- ═══════════════ MAIN ═══════════════ -->
-    <main class="flex-1 overflow-y-auto p-8">
-        <div id="toast-container"></div>
-        <div class="max-w-6xl mx-auto">
+    <!-- ═══════════════ KONTEN KANAN ═══════════════ -->
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
 
-            <!-- HEADER -->
-            <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
-                <div>
-                    <h1 class="text-3xl font-black header-title mb-1">
-                        Selamat datang, <span id="greeting-nama" class="text-emerald-400">Admin</span>
-                    </h1>
-                    <p class="header-sub text-sm font-medium">Dashboard Sistem K-Means Clustering — Azhar Tani Mandiri</p>
+        <!-- TOPBAR MOBILE -->
+        <div class="mobile-topbar">
+            <button class="hamburger-btn" onclick="openSidebar()">
+                <i class="fas fa-bars" style="font-size:15px;"></i>
+            </button>
+            <div class="topbar-brand">
+                <div class="nav-logo-ring" style="width:30px;height:30px;border-radius:8px;">
+                    <i class="fas fa-leaf text-white" style="font-size:12px;"></i>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="chip-ai">
-                        <span class="chip-ai-dot"></span>
-                        Sistem Clustering aktif
-                    </div>
-                    <div class="chip-date">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <span id="tanggal-teks"></span>
-                    </div>
-                </div>
+                <span style="color:#f9fafb; font-size:14px; font-weight:700;">Azhar Tani</span>
             </div>
-
-            <!-- STAT CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-7 fade-up fade-up-1">
-
-                <div class="stat-card card-total" onclick="toggleCard(this)">
-                    <div class="stat-glow"></div>
-                    <div class="stat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                    </div>
-                    <div class="stat-num mono" id="stat-total">—</div>
-                    <div class="stat-label">Total Produk</div>
-                    <div class="stat-sub">Semua Produk terdaftar</div>
-                </div>
-
-                <div class="stat-card card-paling" onclick="toggleCard(this)">
-                    <div class="stat-glow"></div>
-                    <div class="stat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                    </div>
-                    <div class="stat-num mono" id="stat-paling">—</div>
-                    <div class="stat-label">Paling Laris</div>
-                    <div class="stat-sub">Cluster unggulan</div>
-                </div>
-
-                <div class="stat-card card-cukup" onclick="toggleCard(this)">
-                    <div class="stat-glow"></div>
-                    <div class="stat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                    </div>
-                    <div class="stat-num mono" id="stat-cukup">—</div>
-                    <div class="stat-label">Cukup Laris</div>
-                    <div class="stat-sub">Potensial ditingkatkan</div>
-                </div>
-
-                <div class="stat-card card-kurang" onclick="toggleCard(this)">
-                    <div class="stat-glow"></div>
-                    <div class="stat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </div>
-                    <div class="stat-num mono" id="stat-kurang">—</div>
-                    <div class="stat-label">Kurang Laris</div>
-                    <div class="stat-sub">Perlu evaluasi segera</div>
-                </div>
-
-            </div>
-
-            <!-- MAIN GRID -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <!-- KIRI -->
-                <div class="lg:col-span-2 space-y-6">
-
-                    <!-- Hasil Clustering -->
-                    <div class="content-card fade-up fade-up-2">
-                        <div class="content-card-title">
-                            <div class="title-icon" style="background:rgba(5,150,105,0.2);">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-                            </div>
-                            Hasil Clustering Terakhir
-                        </div>
-                        <div id="info-clustering" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div class="text-sm col-span-4" style="color:rgba(255,255,255,0.3); font-style:italic;">Belum ada data. Jalankan clustering.</div>
-                        </div>
-                    </div>
-
-                    <!-- Donut Chart -->
-                    <div id="chart-section" class="hidden content-card fade-up fade-up-3">
-                        <div class="content-card-title">
-                            <div class="title-icon" style="background:rgba(59,130,246,0.15);">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                            </div>
-                            Distribusi Cluster Produk
-                            <span style="font-size:11px; color:rgba(255,255,255,0.25); font-weight:400; margin-left:4px;">— K-Means terakhir</span>
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-center gap-8">
-                            <div style="position:relative; width:180px; height:180px; flex-shrink:0;">
-                                <canvas id="donutChart" role="img" aria-label="Distribusi cluster produk"></canvas>
-                                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
-                                    <div class="mono" style="font-size:26px; font-weight:900; color:#f9fafb;" id="donut-total">—</div>
-                                    <div style="font-size:10px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Produk</div>
-                                </div>
-                            </div>
-                            <div class="flex-1 space-y-4 w-full">
-                                <div class="legend-row">
-                                    <div class="flex items-center gap-2">
-                                        <span class="legend-dot" style="background:#22c55e;"></span>
-                                        <span class="legend-label">Paling Laris</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="mini-bar-track hidden sm:block">
-                                            <div id="bar-paling" class="mini-bar-fill" style="background:#22c55e; width:0%;"></div>
-                                        </div>
-                                        <span class="legend-count" id="lbl-paling">—</span>
-                                        <span class="legend-pct" id="pct-paling"></span>
-                                    </div>
-                                </div>
-                                <div class="legend-row">
-                                    <div class="flex items-center gap-2">
-                                        <span class="legend-dot" style="background:#fbbf24;"></span>
-                                        <span class="legend-label">Cukup Laris</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="mini-bar-track hidden sm:block">
-                                            <div id="bar-cukup" class="mini-bar-fill" style="background:#fbbf24; width:0%;"></div>
-                                        </div>
-                                        <span class="legend-count" id="lbl-cukup">—</span>
-                                        <span class="legend-pct" id="pct-cukup"></span>
-                                    </div>
-                                </div>
-                                <div class="legend-row">
-                                    <div class="flex items-center gap-2">
-                                        <span class="legend-dot" style="background:#f87171;"></span>
-                                        <span class="legend-label">Kurang Laris</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="mini-bar-track hidden sm:block">
-                                            <div id="bar-kurang" class="mini-bar-fill" style="background:#f87171; width:0%;"></div>
-                                        </div>
-                                        <span class="legend-count" id="lbl-kurang">—</span>
-                                        <span class="legend-pct" id="pct-kurang"></span>
-                                    </div>
-                                </div>
-                                <div style="padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); margin-top:4px;">
-                                    <p style="font-size:11px; color:rgba(255,255,255,0.25); line-height:1.6;">
-                                        Scatter plot & detail cluster tersedia di
-                                        <a href="hasil.html" style="color:#34d399; font-weight:600;">Hasil & Saran →</a>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saran -->
-                    <div id="saran-section" class="hidden fade-up fade-up-4">
-                        <div style="font-size:15px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-                            <div class="title-icon" style="background:rgba(245,158,11,0.15);">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            </div>
-                            Saran Terkini
-                        </div>
-                        <div id="saran-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                    </div>
-                </div>
-
-                <!-- KANAN -->
-                <div class="space-y-6">
-                    <div id="riwayat-section" class="hidden fade-up fade-up-4">
-                        <div style="font-size:15px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-                            <div class="title-icon" style="background:rgba(255,255,255,0.06);">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            </div>
-                            Riwayat Upload
-                        </div>
-                        <div class="content-card" style="padding:0; overflow:hidden;">
-                            <div id="riwayat-list"></div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="chip-ai" style="font-size:11px; padding:5px 10px;">
+                <span class="chip-ai-dot"></span>
+                Aktif
             </div>
         </div>
-    </main>
 
+        <!-- MAIN -->
+        <main>
+            <div id="toast-container"></div>
+            <div class="main-inner">
+
+                <!-- HEADER -->
+                <div class="header-row fade-up">
+                    <div>
+                        <h1 class="text-2xl font-black header-title mb-1" style="font-size:clamp(18px,4vw,28px);">
+                            Selamat datang, <span id="greeting-nama" class="text-emerald-400">Admin</span>
+                        </h1>
+                        <p class="header-sub text-sm font-medium" style="font-size:12px;">Dashboard Sistem K-Means Clustering — Azhar Tani Mandiri</p>
+                    </div>
+                    <div class="chips-row">
+                        <div class="chip-ai">
+                            <span class="chip-ai-dot"></span>
+                            Sistem Clustering aktif
+                        </div>
+                        <div class="chip-date">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span id="tanggal-teks"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT CARDS -->
+                <div class="stat-grid fade-up fade-up-1">
+                    <div class="stat-card card-total" onclick="toggleCard(this)">
+                        <div class="stat-glow"></div>
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </div>
+                        <div class="stat-num" id="stat-total">—</div>
+                        <div class="stat-label">Total Produk</div>
+                        <div class="stat-sub">Semua produk terdaftar</div>
+                    </div>
+
+                    <div class="stat-card card-paling" onclick="toggleCard(this)">
+                        <div class="stat-glow"></div>
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/></svg>
+                        </div>
+                        <div class="stat-num" id="stat-paling">—</div>
+                        <div class="stat-label">Paling Laris</div>
+                        <div class="stat-sub">Cluster unggulan</div>
+                    </div>
+
+                    <div class="stat-card card-cukup" onclick="toggleCard(this)">
+                        <div class="stat-glow"></div>
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div class="stat-num" id="stat-cukup">—</div>
+                        <div class="stat-label">Cukup Laris</div>
+                        <div class="stat-sub">Potensial ditingkatkan</div>
+                    </div>
+
+                    <div class="stat-card card-kurang" onclick="toggleCard(this)">
+                        <div class="stat-glow"></div>
+                        <div class="stat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <div class="stat-num" id="stat-kurang">—</div>
+                        <div class="stat-label">Kurang Laris</div>
+                        <div class="stat-sub">Perlu evaluasi segera</div>
+                    </div>
+                </div>
+
+                <!-- MAIN CONTENT GRID -->
+                <div class="content-grid">
+
+                    <!-- KIRI -->
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+
+                        <!-- Hasil Clustering -->
+                        <div class="content-card fade-up fade-up-2">
+                            <div class="content-card-title">
+                                <div class="title-icon" style="background:rgba(5,150,105,0.2);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                                </div>
+                                Hasil Clustering Terakhir
+                            </div>
+                            <div id="info-clustering" class="metric-grid">
+                                <div style="font-size:12px; grid-column:1/-1; color:rgba(255,255,255,0.3); font-style:italic;">Belum ada data. Jalankan clustering.</div>
+                            </div>
+                        </div>
+
+                        <!-- Donut Chart -->
+                        <div id="chart-section" class="hidden content-card fade-up fade-up-3">
+                            <div class="content-card-title">
+                                <div class="title-icon" style="background:rgba(59,130,246,0.15);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                                </div>
+                                Distribusi Cluster Produk
+                            </div>
+                            <div class="donut-wrapper">
+                                <div style="position:relative; width:160px; height:160px; flex-shrink:0;">
+                                    <canvas id="donutChart" role="img" aria-label="Distribusi cluster produk"></canvas>
+                                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+                                        <div style="font-size:22px; font-weight:900; color:#f9fafb; font-family:'JetBrains Mono',monospace;" id="donut-total">—</div>
+                                        <div style="font-size:9px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Produk</div>
+                                    </div>
+                                </div>
+                                <div style="flex:1; display:flex; flex-direction:column; gap:14px; width:100%;">
+                                    <div class="legend-row">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span class="legend-dot" style="background:#22c55e;"></span>
+                                            <span class="legend-label">Paling Laris</span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div class="mini-bar-track"><div id="bar-paling" class="mini-bar-fill" style="background:#22c55e; width:0%;"></div></div>
+                                            <span class="legend-count" id="lbl-paling">—</span>
+                                            <span class="legend-pct" id="pct-paling"></span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-row">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span class="legend-dot" style="background:#fbbf24;"></span>
+                                            <span class="legend-label">Cukup Laris</span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div class="mini-bar-track"><div id="bar-cukup" class="mini-bar-fill" style="background:#fbbf24; width:0%;"></div></div>
+                                            <span class="legend-count" id="lbl-cukup">—</span>
+                                            <span class="legend-pct" id="pct-cukup"></span>
+                                        </div>
+                                    </div>
+                                    <div class="legend-row">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span class="legend-dot" style="background:#f87171;"></span>
+                                            <span class="legend-label">Kurang Laris</span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div class="mini-bar-track"><div id="bar-kurang" class="mini-bar-fill" style="background:#f87171; width:0%;"></div></div>
+                                            <span class="legend-count" id="lbl-kurang">—</span>
+                                            <span class="legend-pct" id="pct-kurang"></span>
+                                        </div>
+                                    </div>
+                                    <div style="padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);">
+                                        <p style="font-size:11px; color:rgba(255,255,255,0.25); line-height:1.6;">
+                                            Detail cluster di <a href="hasil.html" style="color:#34d399; font-weight:600;">Hasil & Saran →</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Saran -->
+                        <div id="saran-section" class="hidden fade-up fade-up-4">
+                            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                                <div class="title-icon" style="background:rgba(245,158,11,0.15);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                </div>
+                                Saran Terkini
+                            </div>
+                            <div id="saran-container" class="saran-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- KANAN -->
+                    <div>
+                        <div id="riwayat-section" class="hidden fade-up fade-up-4">
+                            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                                <div class="title-icon" style="background:rgba(255,255,255,0.06);">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                                Riwayat Upload
+                            </div>
+                            <div class="content-card" style="padding:0; overflow:hidden;">
+                                <div id="riwayat-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script>
+// ── Sidebar mobile toggle ──
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('sidebar-open')
+    document.getElementById('sidebar-overlay').classList.add('active')
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('sidebar-open')
+    document.getElementById('sidebar-overlay').classList.remove('active')
+}
+
+// ── Stat card toggle ──
 function toggleCard(el) {
     const allCards = document.querySelectorAll('.stat-card')
     const isActive = el.classList.contains('active-card')
@@ -539,7 +759,7 @@ onAuthStateChanged(auth, async user => {
     localStorage.setItem('fb_token', token)
     const nama = localStorage.getItem('user_nama') || 'Admin'
     document.getElementById('greeting-nama').textContent = nama
-    document.getElementById('tanggal-teks').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long', year:'numeric', month:'long', day:'numeric'})
+    document.getElementById('tanggal-teks').textContent = new Date().toLocaleDateString('id-ID', {weekday:'short', year:'numeric', month:'short', day:'numeric'})
     loadDashboard()
 })
 
@@ -582,13 +802,12 @@ async function loadDashboard() {
                 <div class="status-badge">
                     <div class="status-badge-lbl">Status</div>
                     <div class="status-badge-val">${sil.label}</div>
-                    <div style="margin-top:8px; display:flex; justify-content:center;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div style="margin-top:6px;display:flex;justify-content:center;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                 </div>
             `
 
-            // Donut
             const totalCluster = paling + cukup + kurang
             document.getElementById('chart-section').classList.remove('hidden')
             document.getElementById('donut-total').textContent = formatAngka(totalCluster)
@@ -600,9 +819,9 @@ async function loadDashboard() {
             document.getElementById('pct-paling').textContent = pct(paling)
             document.getElementById('pct-cukup').textContent  = pct(cukup)
             document.getElementById('pct-kurang').textContent = pct(kurang)
-            document.getElementById('bar-paling').style.width = totalCluster > 0 ? (paling/totalCluster*100)+'%' : '0%'
-            document.getElementById('bar-cukup').style.width  = totalCluster > 0 ? (cukup/totalCluster*100)+'%' : '0%'
-            document.getElementById('bar-kurang').style.width = totalCluster > 0 ? (kurang/totalCluster*100)+'%' : '0%'
+            document.getElementById('bar-paling').style.width = totalCluster>0?(paling/totalCluster*100)+'%':'0%'
+            document.getElementById('bar-cukup').style.width  = totalCluster>0?(cukup/totalCluster*100)+'%':'0%'
+            document.getElementById('bar-kurang').style.width = totalCluster>0?(kurang/totalCluster*100)+'%':'0%'
 
             if (donutInstance) donutInstance.destroy()
             donutInstance = new Chart(document.getElementById('donutChart'), {
@@ -612,9 +831,7 @@ async function loadDashboard() {
                     datasets: [{
                         data: [paling, cukup, kurang],
                         backgroundColor: ['#22c55e','#fbbf24','#f87171'],
-                        borderWidth: 4,
-                        borderColor: '#111827',
-                        hoverOffset: 8
+                        borderWidth: 4, borderColor: '#111827', hoverOffset: 8
                     }]
                 },
                 options: {
@@ -622,75 +839,51 @@ async function loadDashboard() {
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1f2937',
-                            titleColor: '#f9fafb',
-                            bodyColor: 'rgba(255,255,255,0.6)',
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: ctx => '  ' + ctx.label + ': ' + ctx.raw + ' produk (' + pct(ctx.raw) + ')'
-                            }
+                            backgroundColor:'#1f2937', titleColor:'#f9fafb',
+                            bodyColor:'rgba(255,255,255,0.6)',
+                            borderColor:'rgba(255,255,255,0.1)', borderWidth:1,
+                            callbacks: { label: ctx => '  '+ctx.label+': '+ctx.raw+' produk ('+pct(ctx.raw)+')' }
                         }
                     }
                 }
             })
         }
 
-        // Saran
         if (hasilRes.saran?.length) {
             document.getElementById('saran-section').classList.remove('hidden')
             const cfgMap = {
-                green: {
-                    cls: 'saran-green',
-                    titleColor: '#86efac', bodyColor: 'rgba(134,239,172,0.7)',
-                    badgeStyle: 'background:rgba(22,163,74,0.2); color:#86efac; border:1px solid rgba(74,222,128,0.2);',
-                    iconStyle: 'background:rgba(22,163,74,0.2);',
-                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`
-                },
-                amber: {
-                    cls: 'saran-amber',
-                    titleColor: '#fde68a', bodyColor: 'rgba(253,230,138,0.7)',
-                    badgeStyle: 'background:rgba(217,119,6,0.2); color:#fde68a; border:1px solid rgba(251,191,36,0.2);',
-                    iconStyle: 'background:rgba(217,119,6,0.2);',
-                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
-                },
-                red: {
-                    cls: 'saran-red',
-                    titleColor: '#fca5a5', bodyColor: 'rgba(252,165,165,0.7)',
-                    badgeStyle: 'background:rgba(220,38,38,0.2); color:#fca5a5; border:1px solid rgba(252,165,165,0.2);',
-                    iconStyle: 'background:rgba(220,38,38,0.2);',
-                    svg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
-                }
+                green: { cls:'saran-green', titleColor:'#86efac', bodyColor:'rgba(134,239,172,0.7)', badgeStyle:'background:rgba(22,163,74,0.2);color:#86efac;border:1px solid rgba(74,222,128,0.2);', iconStyle:'background:rgba(22,163,74,0.2);', svg:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/></svg>` },
+                amber: { cls:'saran-amber', titleColor:'#fde68a', bodyColor:'rgba(253,230,138,0.7)', badgeStyle:'background:rgba(217,119,6,0.2);color:#fde68a;border:1px solid rgba(251,191,36,0.2);', iconStyle:'background:rgba(217,119,6,0.2);', svg:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>` },
+                red:   { cls:'saran-red',   titleColor:'#fca5a5', bodyColor:'rgba(252,165,165,0.7)', badgeStyle:'background:rgba(220,38,38,0.2);color:#fca5a5;border:1px solid rgba(252,165,165,0.2);', iconStyle:'background:rgba(220,38,38,0.2);', svg:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>` }
             }
             document.getElementById('saran-container').innerHTML = hasilRes.saran.map(s => {
                 const cfg = cfgMap[s.warna] || cfgMap.green
                 return `
                     <div class="saran-card ${cfg.cls}">
-                        <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-                            <div style="width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; ${cfg.iconStyle}">${cfg.svg}</div>
-                            <div style="font-size:13px; font-weight:800; color:${cfg.titleColor}; line-height:1.4;">${s.judul}</div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">
+                            <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${cfg.iconStyle}">${cfg.svg}</div>
+                            <div style="font-size:12px;font-weight:800;color:${cfg.titleColor};line-height:1.4;">${s.judul}</div>
                         </div>
-                        <p style="font-size:12px; color:${cfg.bodyColor}; line-height:1.6; margin-bottom:14px;">${s.isi}</p>
-                        <div style="font-size:10px; font-weight:700; padding:4px 12px; border-radius:8px; display:inline-block; ${cfg.badgeStyle}">${s.produk.length} Produk Terdeteksi</div>
+                        <p style="font-size:11px;color:${cfg.bodyColor};line-height:1.6;margin-bottom:12px;">${s.isi}</p>
+                        <div style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:7px;display:inline-block;${cfg.badgeStyle}">${s.produk.length} Produk Terdeteksi</div>
                     </div>
                 `
             }).join('')
         }
 
-        // Riwayat
         if (riwayatRes?.length) {
             document.getElementById('riwayat-section').classList.remove('hidden')
             document.getElementById('riwayat-list').innerHTML = riwayatRes.slice(0,5).map(r => `
                 <div class="riwayat-item">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="riwayat-file-icon" style="background:${r.tipe_file==='pdf' ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)'};">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="riwayat-file-icon" style="background:${r.tipe_file==='pdf'?'rgba(239,68,68,0.12)':'rgba(59,130,246,0.12)'};">
                             ${r.tipe_file==='pdf'
-                                ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
-                                : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`
+                                ?`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+                                :`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`
                             }
                         </div>
                         <div>
-                            <div class="riwayat-nama truncate" style="max-width:180px;">${r.nama_file}</div>
+                            <div class="riwayat-nama" style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.nama_file}</div>
                             <div class="riwayat-meta">${new Date(r.created_at).toLocaleDateString('id-ID')} · ${r.produk_unik} item</div>
                         </div>
                     </div>

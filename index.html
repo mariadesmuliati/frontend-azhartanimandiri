@@ -9,6 +9,47 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Tambahkan ini di bagian <style> setiap file */
+
+/* Pastikan viewport meta ada di <head> */
+/* <meta name="viewport" content="width=device-width, initial-scale=1.0"> */
+
+@media (max-width: 768px) {
+  /* Sidebar jadi hidden / hamburger menu */
+  .sidebar {
+    position: fixed;
+    left: -250px;
+    transition: left 0.3s ease;
+    z-index: 999;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Konten utama full width */
+  .main-content, .content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 10px !important;
+  }
+
+  /* Card grid jadi 1 kolom */
+  .card-grid, .stats-grid {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+  }
+
+  /* Font lebih kecil */
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.2rem; }
+  
+  /* Table scrollable */
+  table { 
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
         .login-bg {
             background-image: url('assets/img/logo_sistemClustering.png');
             background-size: cover;

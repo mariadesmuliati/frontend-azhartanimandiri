@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hasil & Saran — ClusterToko</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
@@ -11,157 +11,221 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
-    * { box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; overflow-x:hidden; }
     .mono { font-family: 'JetBrains Mono', monospace; }
-    aside { background: linear-gradient(180deg, #111827 0%, #0f1117 100%); border-right: 1px solid rgba(255,255,255,0.06); }
-    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); }
-    .nav-link { color: rgba(255,255,255,0.4); transition: all 0.2s; border-radius: 14px; }
-    .nav-link:hover { background: rgba(16,185,129,0.1); color: #34d399; }
-    .nav-link.active { background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15)); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
-    .nav-link-logout { color: rgba(248,113,113,0.6); transition: all 0.2s; border-radius: 14px; }
-    .nav-link-logout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
-    .content-card { background: rgba(17,24,39,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 24px; }
-    .title-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .content-card-title { color: #f9fafb; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
 
-    /* Tabs */
-    .tab-bar { display: flex; gap: 4px; padding: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; width: fit-content; }
-    .tab-btn { padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); border: none; background: transparent; }
-    .tab-btn.active { background: rgba(5,150,105,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
-    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.04); }
+    /* ── APP WRAPPER ── */
+    .app-wrapper { display:flex; min-height:100vh; }
 
-    /* Filter buttons */
-    .filter-btn { padding: 7px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-    .filter-btn.active { background: rgba(5,150,105,0.2); color: #34d399; border-color: rgba(52,211,153,0.3); }
-    .filter-btn:hover:not(.active) { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+    /* ── SIDEBAR ── */
+    aside {
+      width:256px; flex-shrink:0;
+      background: linear-gradient(180deg, #111827 0%, #0f1117 100%);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      display:flex; flex-direction:column;
+      height:100vh; position:sticky; top:0; z-index:50;
+    }
+    @media (max-width:768px) {
+      aside {
+        position:fixed; top:0; left:0; height:100vh; width:240px;
+        transform:translateX(-100%); transition:transform 0.3s ease;
+        z-index:200; box-shadow:4px 0 24px rgba(0,0,0,0.5);
+      }
+      aside.sidebar-open { transform:translateX(0); }
+    }
 
-    /* Table */
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table thead tr { border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .data-table th { padding: 12px 16px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.07em; text-align: left; }
-    .data-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
-    .data-table tbody tr:last-child { border-bottom: none; }
-    .data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
-    .data-table td { padding: 11px 16px; font-size: 12px; }
-    .search-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 9px 14px; color: #f9fafb; font-size: 13px; outline: none; transition: border-color 0.2s; flex: 1; min-width: 180px; }
-    .search-input:focus { border-color: rgba(52,211,153,0.35); }
-    .search-input::placeholder { color: rgba(255,255,255,0.2); }
+    /* ── OVERLAY ── */
+    #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:199; backdrop-filter:blur(2px); }
+    #sidebar-overlay.active { display:block; }
 
-    /* Cluster card */
-    .cluster-card { border-radius: 16px; border: 1px solid; overflow: hidden; display: flex; flex-direction: column; height: 420px; }
-    .cluster-green { background: linear-gradient(135deg, rgba(20,83,45,0.3), rgba(17,24,39,0.9)); border-color: rgba(74,222,128,0.2); }
-    .cluster-amber  { background: linear-gradient(135deg, rgba(120,53,15,0.3), rgba(17,24,39,0.9)); border-color: rgba(251,191,36,0.2); }
-    .cluster-red    { background: linear-gradient(135deg, rgba(127,29,29,0.3), rgba(17,24,39,0.9)); border-color: rgba(252,165,165,0.2); }
-    .cluster-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
-    .cluster-scroll { flex: 1; overflow-y: auto; padding: 12px; }
-    .cluster-item { padding: 9px 12px; border-radius: 10px; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; transition: background 0.15s; margin-bottom: 4px; }
-    .cluster-item:hover { background: rgba(255,255,255,0.06); }
+    /* ── MOBILE TOPBAR ── */
+    .mobile-topbar { display:none; position:sticky; top:0; z-index:100; background:#111827; border-bottom:1px solid rgba(255,255,255,0.06); padding:12px 16px; align-items:center; gap:12px; }
+    @media (max-width:768px) { .mobile-topbar { display:flex; } }
+    .hamburger-btn { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:rgba(255,255,255,0.7); flex-shrink:0; }
 
-    /* Saran card */
-    .saran-card { border-radius: 16px; padding: 22px; border: 1px solid; transition: transform 0.2s; }
-    .saran-card:hover { transform: translateY(-2px); }
-    .saran-green { background: linear-gradient(135deg, rgba(20,83,45,0.4), rgba(22,101,52,0.2)); border-color: rgba(74,222,128,0.2); }
-    .saran-amber  { background: linear-gradient(135deg, rgba(120,53,15,0.4), rgba(146,64,14,0.2)); border-color: rgba(251,191,36,0.2); }
-    .saran-red    { background: linear-gradient(135deg, rgba(127,29,29,0.4), rgba(153,27,27,0.2)); border-color: rgba(252,165,165,0.2); }
+    /* ── NAV ── */
+    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .nav-link { color:rgba(255,255,255,0.4); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; text-decoration:none; }
+    .nav-link:hover { background:rgba(16,185,129,0.1); color:#34d399; }
+    .nav-link.active { background:linear-gradient(135deg,rgba(5,150,105,0.25),rgba(4,120,87,0.15)); color:#34d399; border:1px solid rgba(52,211,153,0.2); font-weight:600; }
+    .nav-link-logout { color:rgba(248,113,113,0.6); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; width:100%; background:none; border:none; cursor:pointer; }
+    .nav-link-logout:hover { background:rgba(239,68,68,0.1); color:#f87171; }
 
-    /* Stat mini */
-    .stat-mini { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 16px; }
-    .stat-mini-val { font-size: 18px; font-weight: 800; color: #f9fafb; font-family: 'JetBrains Mono', monospace; }
-    .stat-mini-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+    /* ── MAIN ── */
+    .content-wrapper { flex:1; min-width:0; display:flex; flex-direction:column; }
+    main { flex:1; overflow-y:auto; overflow-x:hidden; }
+    .main-inner { max-width:1200px; margin:0 auto; padding:32px; }
+    @media (max-width:768px) { .main-inner { padding:16px; } }
 
-    /* Bar animated */
-    .bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+    /* ── CONTENT CARDS ── */
+    .content-card { background:rgba(17,24,39,0.8); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:24px; }
+    @media (max-width:480px) { .content-card { padding:16px; border-radius:16px; } }
+    .title-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .content-card-title { color:#f9fafb; font-size:14px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
 
-    ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation: fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
+    /* ── HEADER ── */
+    .page-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:24px; }
+    .page-header h1 { color:#f9fafb; font-size:clamp(20px,4vw,28px); font-weight:900; }
+    .page-header p { color:rgba(255,255,255,0.35); font-size:13px; margin-top:4px; }
+
+    /* ── VALIDASI CHIPS GRID ── */
+    .validasi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    @media (max-width:768px) { .validasi-grid { grid-template-columns:repeat(2,1fr); gap:10px; } }
+
+    /* ── TABS ── */
+    .tab-bar { display:flex; gap:4px; padding:5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:14px; width:fit-content; flex-wrap:wrap; margin-bottom:20px; }
+    .tab-btn { padding:8px 14px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; color:rgba(255,255,255,0.4); border:none; background:transparent; white-space:nowrap; }
+    .tab-btn.active { background:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(52,211,153,0.25); }
+    .tab-btn:hover:not(.active) { color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.04); }
+    @media (max-width:480px) { .tab-btn { padding:7px 10px; font-size:11px; } .tab-btn i { display:none; } }
+
+    /* ── FILTER ── */
+    .filter-bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; margin-bottom:12px; }
+    .filter-btn { padding:6px 14px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); white-space:nowrap; }
+    .filter-btn.active { background:rgba(5,150,105,0.2); color:#34d399; border-color:rgba(52,211,153,0.3); }
+    .search-input { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px 14px; color:#f9fafb; font-size:13px; outline:none; transition:border-color 0.2s; flex:1; min-width:140px; }
+    .search-input:focus { border-color:rgba(52,211,153,0.35); }
+    .search-input::placeholder { color:rgba(255,255,255,0.2); }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .data-table { width:100%; border-collapse:collapse; min-width:580px; }
+    .data-table thead tr { border-bottom:1px solid rgba(255,255,255,0.07); }
+    .data-table th { padding:11px 14px; font-size:10px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.07em; text-align:left; white-space:nowrap; }
+    .data-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); transition:background 0.15s; }
+    .data-table tbody tr:last-child { border-bottom:none; }
+    .data-table tbody tr:hover { background:rgba(255,255,255,0.03); }
+    .data-table td { padding:10px 14px; font-size:12px; white-space:nowrap; }
+
+    /* ── CLUSTER CARDS ── */
+    .cluster-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    @media (max-width:768px) { .cluster-grid { grid-template-columns:1fr; } }
+    .cluster-card { border-radius:16px; border:1px solid; overflow:hidden; display:flex; flex-direction:column; height:380px; }
+    @media (max-width:480px) { .cluster-card { height:300px; } }
+    .cluster-green { background:linear-gradient(135deg,rgba(20,83,45,0.3),rgba(17,24,39,0.9)); border-color:rgba(74,222,128,0.2); }
+    .cluster-amber  { background:linear-gradient(135deg,rgba(120,53,15,0.3),rgba(17,24,39,0.9)); border-color:rgba(251,191,36,0.2); }
+    .cluster-red    { background:linear-gradient(135deg,rgba(127,29,29,0.3),rgba(17,24,39,0.9)); border-color:rgba(252,165,165,0.2); }
+    .cluster-header { padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; }
+    .cluster-scroll { flex:1; overflow-y:auto; padding:10px; }
+    .cluster-item { padding:8px 12px; border-radius:10px; font-size:12px; color:rgba(255,255,255,0.6); font-weight:500; transition:background 0.15s; margin-bottom:4px; }
+    .cluster-item:hover { background:rgba(255,255,255,0.06); }
+
+    /* ── SARAN CARDS ── */
+    .saran-card { border-radius:16px; padding:20px; border:1px solid; transition:transform 0.2s; margin-bottom:14px; }
+    .saran-card:hover { transform:translateY(-2px); }
+    .saran-green { background:linear-gradient(135deg,rgba(20,83,45,0.4),rgba(22,101,52,0.2)); border-color:rgba(74,222,128,0.2); }
+    .saran-amber  { background:linear-gradient(135deg,rgba(120,53,15,0.4),rgba(146,64,14,0.2)); border-color:rgba(251,191,36,0.2); }
+    .saran-red    { background:linear-gradient(135deg,rgba(127,29,29,0.4),rgba(153,27,27,0.2)); border-color:rgba(252,165,165,0.2); }
+
+    /* ── CHART GRID ── */
+    .chart-grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+    @media (max-width:768px) { .chart-grid-2 { grid-template-columns:1fr; } }
+
+    /* ── STAT MINI ── */
+    .stat-mini { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:14px 16px; }
+    .stat-mini-val { font-size:18px; font-weight:800; color:#f9fafb; font-family:'JetBrains Mono',monospace; }
+    .stat-mini-lbl { font-size:10px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
+
+    /* ── BAR ANIMATED ── */
+    .bar-track { height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+
+    ::-webkit-scrollbar { width:4px; height:4px; } ::-webkit-scrollbar-track { background:#0f1117; } ::-webkit-scrollbar-thumb { background:rgba(16,185,129,0.3); border-radius:3px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
     #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
-    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:300px; animation:fadeUp .3s ease; }
     .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
-    .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+    .toast-error   { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
-<body class="min-h-screen flex">
+<body>
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-wrapper">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
     <div class="p-6 pb-4">
       <div class="flex items-center gap-3">
-        <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
-          <i class="fas fa-leaf text-white text-lg"></i>
-        </div>
-        <span class="text-lg font-bold tracking-tight" style="color:#f9fafb;">Azhar Tani</span>
+        <div class="nav-logo-ring"><i class="fas fa-leaf text-white text-base"></i></div>
+        <span style="color:#f9fafb; font-size:16px; font-weight:700;">Azhar Tani</span>
       </div>
     </div>
     <nav class="flex-1 px-4 space-y-1 mt-2">
-      <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
-      <a href="upload.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
-      <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
-      <a href="hasil.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
+      <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+      <a href="upload.html"    class="nav-link"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
+      <a href="clustering.html" class="nav-link"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
+      <a href="hasil.html"     class="nav-link active"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
     </nav>
     <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
-      <button onclick="_logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
+      <button onclick="_logout()" class="nav-link-logout"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
     </div>
   </aside>
 
+  <div class="content-wrapper">
+    <!-- MOBILE TOPBAR -->
+    <div class="mobile-topbar">
+      <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars" style="font-size:15px;"></i></button>
+      <div style="display:flex; align-items:center; gap:8px; flex:1;">
+        <div class="nav-logo-ring" style="width:30px;height:30px;border-radius:8px;"><i class="fas fa-leaf text-white" style="font-size:12px;"></i></div>
+        <span style="color:#f9fafb; font-size:14px; font-weight:700;">Azhar Tani</span>
+      </div>
+      <a href="clustering.html" style="font-size:11px; font-weight:700; color:#34d399; padding:6px 10px; background:rgba(5,150,105,0.15); border:1px solid rgba(52,211,153,0.25); border-radius:8px; text-decoration:none; white-space:nowrap;">
+        <i class="fas fa-sync-alt"></i> Ulang
+      </a>
+    </div>
+
   <!-- MAIN -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <div id="toast-container"></div>
-    <div class="max-w-6xl mx-auto">
+    <main>
+      <div id="toast-container"></div>
+      <div class="main-inner">
 
-      <!-- Header -->
-      <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
-        <div>
-          <h1 style="color:#f9fafb; font-size:28px; font-weight:900;">Hasil & Saran</h1>
-          <p style="color:rgba(255,255,255,0.35); font-size:14px; margin-top:4px;">Laporan segmentasi produk berdasarkan performa penjualan K-Means</p>
-        </div>
-        <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); font-size:13px; font-weight:600; padding:9px 18px; border-radius:12px; text-decoration:none; transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(52,211,153,0.4)';this.style.color='#34d399'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.6)'">
-          <i class="fas fa-sync-alt"></i> Jalankan Ulang
-        </a>
-      </div>
-
-      <!-- Loading -->
-      <div id="loading-state" class="content-card text-center" style="padding: 60px 20px;">
-        <div style="width:40px; height:40px; border:2px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px;"></div>
-        <div style="color:rgba(255,255,255,0.3); font-size:14px; font-weight:600;">Menganalisis data...</div>
-      </div>
-    
-      <!-- Empty -->
-      <div id="empty-state" class="hidden content-card text-center" style="padding: 60px 20px;">
-        <div style="width:64px; height:64px; background:rgba(255,255,255,0.04); border-radius:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </div>
-        <div style="color:#f9fafb; font-size:18px; font-weight:800; margin-bottom:8px;">Belum ada hasil clustering</div>
-        <p style="color:rgba(255,255,255,0.35); font-size:13px; margin-bottom:20px;">Unggah data dan jalankan clustering terlebih dahulu</p>
-        <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:13px; font-weight:700; padding:12px 22px; border-radius:12px; text-decoration:none;">Mulai Sekarang →</a>
-      </div>
-
-      <!-- Main content -->
-      <div id="main-content" class="hidden space-y-6">
-
-        <!-- Metric chips -->
-        <div id="validasi-chips" class="grid grid-cols-2 sm:grid-cols-4 gap-4 fade-up"></div>
-
-        <!-- Tabs -->
-        <div class="tab-bar fade-up fade-up-1">
-          <button class="tab-btn active" onclick="showTab('grafik')" id="tab-grafik">
-            <i class="fas fa-chart-scatter mr-2"></i> Grafik
-          </button>
-          <button class="tab-btn" onclick="showTab('tabel')" id="tab-tabel">
-            <i class="fas fa-table mr-2"></i> Tabel
-          </button>
-          <button class="tab-btn" onclick="showTab('cluster')" id="tab-cluster">
-            <i class="fas fa-layer-group mr-2"></i> Per Cluster
-          </button>
-          <button class="tab-btn" onclick="showTab('saran')" id="tab-saran">
-            <i class="fas fa-lightbulb mr-2"></i> Saran
-          </button>
+        <!-- HEADER -->
+        <div class="page-header fade-up">
+          <div>
+            <h1>Hasil &amp; Saran</h1>
+            <p>Laporan segmentasi produk berdasarkan performa penjualan K-Means</p>
+          </div>
+          <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); font-size:13px; font-weight:600; padding:9px 16px; border-radius:12px; text-decoration:none;">
+            <i class="fas fa-sync-alt"></i> Jalankan Ulang
+          </a>
         </div>
 
-        <!-- ═══ TAB GRAFIK ═══ -->
-        <div id="content-grafik" class="space-y-6 fade-up fade-up-2">
+        <!-- Loading -->
+        <div id="loading-state" class="content-card text-center" style="padding:60px 20px;">
+          <div style="width:40px; height:40px; border:2px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px;"></div>
+          <div style="color:rgba(255,255,255,0.3); font-size:14px; font-weight:600;">Menganalisis data...</div>
+        </div>
+
+        <!-- Empty -->
+        <div id="empty-state" class="hidden content-card text-center" style="padding:60px 20px;">
+          <div style="width:64px; height:64px; background:rgba(255,255,255,0.04); border-radius:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <div style="color:#f9fafb; font-size:18px; font-weight:800; margin-bottom:8px;">Belum ada hasil clustering</div>
+          <p style="color:rgba(255,255,255,0.35); font-size:13px; margin-bottom:20px;">Unggah data dan jalankan clustering terlebih dahulu</p>
+          <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:13px; font-weight:700; padding:12px 22px; border-radius:12px; text-decoration:none;">Mulai Sekarang →</a>
+        </div>
+
+        <!-- Main content -->
+        <div id="main-content" class="hidden">
+
+          <!-- Metric chips -->
+          <div id="validasi-chips" class="validasi-grid fade-up"></div>
+
+          <!-- Tabs -->
+          <div class="tab-bar fade-up fade-up-1">
+            <button class="tab-btn active" onclick="showTab('grafik')" id="tab-grafik"><i class="fas fa-chart-bar mr-1"></i> Grafik</button>
+            <button class="tab-btn" onclick="showTab('tabel')" id="tab-tabel"><i class="fas fa-table mr-1"></i> Tabel</button>
+            <button class="tab-btn" onclick="showTab('cluster')" id="tab-cluster"><i class="fas fa-layer-group mr-1"></i> Per Cluster</button>
+            <button class="tab-btn" onclick="showTab('saran')" id="tab-saran"><i class="fas fa-lightbulb mr-1"></i> Saran</button>
+          </div>
+
+          <!-- ═══ TAB GRAFIK ═══ -->
+          <div id="content-grafik" style="display:flex; flex-direction:column; gap:16px;" class="fade-up fade-up-2">
 
           <!-- Scatter plot -->
           <div class="content-card">
@@ -189,7 +253,7 @@
           </div>
 
           <!-- Bar chart omset + distribusi -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="chart-grid-2">
             <div class="content-card">
               <div class="content-card-title">
                 <div class="title-icon" style="background:rgba(16,185,129,0.15);">
@@ -217,7 +281,7 @@
           </div>
 
           <!-- Silhouette per cluster + Statistik -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="chart-grid-2">
             <div class="content-card">
               <div class="content-card-title">
                 <div class="title-icon" style="background:rgba(139,92,246,0.15);">
@@ -242,49 +306,50 @@
           </div>
         </div>
 
-        <!-- ═══ TAB TABEL ═══ -->
-        <div id="content-tabel" class="hidden space-y-4 fade-up">
-          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
-            <button onclick="setFilter('semua',this)" class="filter-btn active">Semua</button>
-            <button onclick="setFilter('paling',this)" class="filter-btn">Paling Laris</button>
-            <button onclick="setFilter('cukup',this)" class="filter-btn">Cukup Laris</button>
-            <button onclick="setFilter('kurang',this)" class="filter-btn">Kurang Laris</button>
-            <input id="inp-cari" oninput="filterTabel()" placeholder="Cari nama barang..." class="search-input">
-          </div>
-          <div class="content-card" style="padding:0; overflow:hidden;">
-            <div style="overflow-x:auto;">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Nama Barang</th>
-                    <th>Qty</th>
-                    <th>Omset</th>
-                    <th>Cluster</th>
-                    <th>Kategori</th>
-                    <th>Silhouette</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-tabel"></tbody>
-              </table>
+          <!-- ═══ TAB TABEL ═══ -->
+          <div id="content-tabel" style="display:none;">
+            <div class="filter-bar">
+              <button onclick="setFilter('semua',this)" class="filter-btn active">Semua</button>
+              <button onclick="setFilter('paling',this)" class="filter-btn">Paling Laris</button>
+              <button onclick="setFilter('cukup',this)" class="filter-btn">Cukup Laris</button>
+              <button onclick="setFilter('kurang',this)" class="filter-btn">Kurang Laris</button>
+              <input id="inp-cari" oninput="filterTabel()" placeholder="Cari nama barang..." class="search-input">
+            </div>
+            <div class="content-card" style="padding:0; overflow:hidden;">
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>No</th><th>Nama Barang</th><th>Qty</th><th>Omset</th><th>Cluster</th><th>Kategori</th><th>Silhouette</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-tabel"></tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- ═══ TAB PER CLUSTER ═══ -->
-        <div id="content-cluster" class="hidden">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="cluster-grid"></div>
-        </div>
+          <!-- ═══ TAB PER CLUSTER ═══ -->
+          <div id="content-cluster" style="display:none;">
+            <div class="cluster-grid" id="cluster-grid"></div>
+          </div>
 
-        <!-- ═══ TAB SARAN ═══ -->
-        <div id="content-saran" class="hidden space-y-5 fade-up">
-          <div id="saran-list" class="space-y-4"></div>
-          <div id="kesimpulan" style="background:linear-gradient(135deg,#064e3b,#065f46); border:1px solid rgba(52,211,153,0.2); border-radius:20px; padding:28px;"></div>
-        </div>
+          <!-- ═══ TAB SARAN ═══ -->
+          <div id="content-saran" style="display:none;">
+            <div id="saran-list"></div>
+            <div id="kesimpulan" style="background:linear-gradient(135deg,#064e3b,#065f46); border:1px solid rgba(52,211,153,0.2); border-radius:20px; padding:24px;"></div>
+          </div>
 
-      </div>
-    </div>
-  </main>
+        </div><!-- /main-content -->
+      </div><!-- /main-inner -->
+    </main>
+  </div><!-- /content-wrapper -->
+</div><!-- /app-wrapper -->
+
+<script>
+function openSidebar()  { document.getElementById('sidebar').classList.add('sidebar-open'); document.getElementById('sidebar-overlay').classList.add('active'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('sidebar-open'); document.getElementById('sidebar-overlay').classList.remove('active'); }
+</script>
 
   <script src="assets/js/config.js"></script>
   <script type="module">
@@ -556,9 +621,14 @@
 
     window.showTab = tab => {
       ['grafik','tabel','cluster','saran'].forEach(t => {
-        document.getElementById(`content-${t}`).classList.toggle('hidden', t!==tab)
-        const btn = document.getElementById(`tab-${t}`)
-        btn.classList.toggle('active', t===tab)
+        const el = document.getElementById(`content-${t}`)
+        if (t === tab) {
+          el.style.display = (t === 'grafik') ? 'flex' : (t === 'saran' ? 'flex' : 'block')
+          if (t === 'saran' || t === 'grafik') el.style.flexDirection = 'column'
+        } else {
+          el.style.display = 'none'
+        }
+        document.getElementById(`tab-${t}`).classList.toggle('active', t===tab)
       })
       if (tab==='grafik') setTimeout(renderGrafik, 100)
     }

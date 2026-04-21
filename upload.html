@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Upload Data — ClusterToko</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
@@ -10,419 +10,380 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
-    * { box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    aside { background: linear-gradient(180deg, #111827 0%, #0f1117 100%); border-right: 1px solid rgba(255,255,255,0.06); }
-    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); }
-    .nav-link { color: rgba(255,255,255,0.4); transition: all 0.2s; border-radius: 14px; }
-    .nav-link:hover { background: rgba(16,185,129,0.1); color: #34d399; }
-    .nav-link.active { background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15)); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
-    .nav-link-logout { color: rgba(248,113,113,0.6); transition: all 0.2s; border-radius: 14px; }
-    .nav-link-logout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
-    .chip-ai { background: rgba(5,150,105,0.15); border: 1px solid rgba(52,211,153,0.25); color: #34d399; border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
-    .chip-ai-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse-dot 2s ease infinite; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#0f1117; background-image:linear-gradient(rgba(16,185,129,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.04) 1px,transparent 1px); background-size:40px 40px; min-height:100vh; overflow-x:hidden; }
+    .mono { font-family:'JetBrains Mono',monospace; }
+
+    .app-wrapper { display:flex; min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    aside { width:256px; flex-shrink:0; background:linear-gradient(180deg,#111827 0%,#0f1117 100%); border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; height:100vh; position:sticky; top:0; z-index:50; }
+    @media (max-width:768px) { aside { position:fixed; top:0; left:0; height:100vh; width:240px; transform:translateX(-100%); transition:transform 0.3s ease; z-index:200; box-shadow:4px 0 24px rgba(0,0,0,0.5); } aside.sidebar-open { transform:translateX(0); } }
+    #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:199; backdrop-filter:blur(2px); }
+    #sidebar-overlay.active { display:block; }
+
+    .mobile-topbar { display:none; position:sticky; top:0; z-index:100; background:#111827; border-bottom:1px solid rgba(255,255,255,0.06); padding:12px 16px; align-items:center; gap:12px; }
+    @media (max-width:768px) { .mobile-topbar { display:flex; } }
+    .hamburger-btn { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:rgba(255,255,255,0.7); flex-shrink:0; }
+
+    .nav-logo-ring { background:linear-gradient(135deg,#059669,#047857); box-shadow:0 0 20px rgba(5,150,105,0.4); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .nav-link { color:rgba(255,255,255,0.4); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; text-decoration:none; }
+    .nav-link:hover { background:rgba(16,185,129,0.1); color:#34d399; }
+    .nav-link.active { background:linear-gradient(135deg,rgba(5,150,105,0.25),rgba(4,120,87,0.15)); color:#34d399; border:1px solid rgba(52,211,153,0.2); font-weight:600; }
+    .nav-link-logout { color:rgba(248,113,113,0.6); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; width:100%; background:none; border:none; cursor:pointer; }
+    .nav-link-logout:hover { background:rgba(239,68,68,0.1); color:#f87171; }
+
+    .content-wrapper { flex:1; min-width:0; display:flex; flex-direction:column; }
+    main { flex:1; overflow-y:auto; overflow-x:hidden; }
+    .main-inner { max-width:1100px; margin:0 auto; padding:32px; }
+    @media (max-width:768px) { .main-inner { padding:16px; } }
+
+    .content-card { background:rgba(17,24,39,0.8); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:24px; margin-bottom:16px; }
+    @media (max-width:480px) { .content-card { padding:16px; border-radius:16px; } }
+    .title-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+    .page-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:24px; }
+    .page-header h1 { color:#f9fafb; font-size:clamp(20px,4vw,28px); font-weight:900; }
+    .page-header p { color:rgba(255,255,255,0.35); font-size:13px; margin-top:4px; }
+
+    .chip-ai { background:rgba(5,150,105,0.15); border:1px solid rgba(52,211,153,0.25); color:#34d399; border-radius:20px; padding:7px 14px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:7px; white-space:nowrap; }
+    .chip-ai-dot { width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981; animation:pulse-dot 2s ease infinite; flex-shrink:0; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-    .content-card { background: rgba(17,24,39,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 28px; }
-    .title-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    /* Dropzone */
-    .dropzone {
-        border: 2px dashed rgba(16,185,129,0.25);
-        border-radius: 18px;
-        padding: 48px 32px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.25s;
-        background: rgba(16,185,129,0.03);
-    }
-    .dropzone:hover, .dropzone.drag-over {
-        border-color: rgba(52,211,153,0.6);
-        background: rgba(16,185,129,0.08);
-    }
-    .dropzone-icon {
-        width: 64px; height: 64px;
-        border-radius: 18px;
-        background: rgba(16,185,129,0.12);
-        border: 1px solid rgba(52,211,153,0.2);
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 16px;
-        transition: all 0.25s;
-    }
-    .dropzone:hover .dropzone-icon { background: rgba(16,185,129,0.2); }
-    .dropzone-title { color: #f9fafb; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-    .dropzone-sub { color: rgba(255,255,255,0.3); font-size: 12px; font-weight: 500; }
+    /* ── UPLOAD GRID ── */
+    .upload-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:900px) { .upload-grid { grid-template-columns:1fr; } }
 
-    /* Mode buttons */
-    .mode-btn {
-        border-radius: 14px;
-        padding: 16px;
-        border: 1px solid rgba(255,255,255,0.08);
-        background: rgba(255,255,255,0.03);
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: left;
-    }
-    .mode-btn:hover { border-color: rgba(52,211,153,0.3); background: rgba(16,185,129,0.06); }
-    .mode-btn.active { border-color: rgba(52,211,153,0.5); background: rgba(16,185,129,0.12); }
-    .mode-title { color: #f9fafb; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
-    .mode-sub { color: rgba(255,255,255,0.35); font-size: 11px; }
-    .mode-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+    /* ── DROPZONE ── */
+    .dropzone { border:2px dashed rgba(16,185,129,0.25); border-radius:18px; padding:36px 20px; text-align:center; cursor:pointer; transition:all 0.25s; background:rgba(16,185,129,0.03); }
+    .dropzone:hover, .dropzone.drag-over { border-color:rgba(52,211,153,0.6); background:rgba(16,185,129,0.08); }
+    @media (max-width:480px) { .dropzone { padding:24px 16px; } }
+    .dropzone-icon { width:56px; height:56px; border-radius:16px; background:rgba(16,185,129,0.12); border:1px solid rgba(52,211,153,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; transition:all 0.25s; }
+    .dropzone:hover .dropzone-icon { background:rgba(16,185,129,0.2); }
+    .dropzone-title { color:#f9fafb; font-size:14px; font-weight:700; margin-bottom:5px; }
+    .dropzone-sub { color:rgba(255,255,255,0.3); font-size:11px; font-weight:500; }
 
-    /* Upload button */
-    .btn-upload-main {
-        width: 100%;
-        background: linear-gradient(135deg, #059669, #047857);
-        color: #fff;
-        font-weight: 800;
-        font-size: 14px;
-        padding: 16px;
-        border-radius: 14px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 4px 20px rgba(5,150,105,0.35);
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .btn-upload-main:hover { box-shadow: 0 8px 32px rgba(5,150,105,0.5); transform: translateY(-1px); }
-    .btn-upload-main:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+    /* ── MODE BUTTONS ── */
+    .mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .mode-btn { border-radius:14px; padding:14px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); cursor:pointer; transition:all 0.2s; text-align:left; }
+    .mode-btn:hover { border-color:rgba(52,211,153,0.3); background:rgba(16,185,129,0.06); }
+    .mode-btn.active { border-color:rgba(52,211,153,0.5); background:rgba(16,185,129,0.12); }
+    .mode-title { color:#f9fafb; font-size:13px; font-weight:700; margin-bottom:2px; }
+    .mode-sub { color:rgba(255,255,255,0.35); font-size:11px; }
+    .mode-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
 
-    /* Success card */
-    .success-card {
-        background: linear-gradient(135deg, #064e3b, #065f46);
-        border: 1px solid rgba(52,211,153,0.25);
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.25);
-    }
+    .btn-upload-main { width:100%; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-weight:800; font-size:14px; padding:15px; border-radius:14px; border:none; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 18px rgba(5,150,105,0.35); display:flex; align-items:center; justify-content:center; gap:10px; }
+    .btn-upload-main:hover { box-shadow:0 8px 28px rgba(5,150,105,0.5); transform:translateY(-1px); }
+    .btn-upload-main:disabled { opacity:0.35; cursor:not-allowed; transform:none; box-shadow:none; }
 
-    /* Riwayat item */
-    .riwayat-item { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; }
-    .riwayat-item:last-child { border-bottom: none; }
-    .riwayat-item:hover { background: rgba(255,255,255,0.03); }
+    .success-card { background:linear-gradient(135deg,#064e3b,#065f46); border:1px solid rgba(52,211,153,0.25); border-radius:20px; padding:22px; box-shadow:0 4px 22px rgba(5,150,105,0.25); margin-bottom:16px; }
 
-    /* Format badge */
-    .format-step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .format-step:last-child { border-bottom: none; }
-    .format-num { width: 28px; height: 28px; border-radius: 8px; background: rgba(16,185,129,0.15); color: #34d399; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    /* ── HASIL DETAIL GRID ── */
+    .hasil-detail-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+    @media (max-width:400px) { .hasil-detail-grid { grid-template-columns:1fr; } }
 
-    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation: fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
+    /* ── RIWAYAT ── */
+    .riwayat-item { padding:12px 14px; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.15s; }
+    .riwayat-item:last-child { border-bottom:none; }
+    .riwayat-item:hover { background:rgba(255,255,255,0.03); }
+
+    /* ── FORMAT ── */
+    .format-step { display:flex; gap:12px; padding:13px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .format-step:last-child { border-bottom:none; }
+    .format-num { width:26px; height:26px; border-radius:8px; background:rgba(16,185,129,0.15); color:#34d399; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+
+    ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:#0f1117; } ::-webkit-scrollbar-thumb { background:rgba(16,185,129,0.3); border-radius:3px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
     #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
-    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:300px; animation:fadeUp .3s ease; }
     .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
-    .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
-    .toast-info { background:#1e3a5f; color:#93c5fd; border:1px solid rgba(147,197,253,0.3); }
+    .toast-error   { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+    .toast-info    { background:#1e3a5f; color:#93c5fd; border:1px solid rgba(147,197,253,0.3); }
   </style>
 </head>
-<body class="min-h-screen flex">
+<body>
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-wrapper">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
     <div class="p-6 pb-4">
       <div class="flex items-center gap-3">
-        <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
-          <i class="fas fa-leaf text-white text-lg"></i>
-        </div>
-        <span class="text-lg font-bold tracking-tight" style="color:#f9fafb;">Azhar Tani</span>
+        <div class="nav-logo-ring"><i class="fas fa-leaf text-white text-base"></i></div>
+        <span style="color:#f9fafb; font-size:16px; font-weight:700;">Azhar Tani</span>
       </div>
     </div>
     <nav class="flex-1 px-4 space-y-1 mt-2">
-      <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
-      <a href="upload.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
-      <a href="clustering.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
-      <a href="hasil.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
+      <a href="dashboard.html"  class="nav-link"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+      <a href="upload.html"     class="nav-link active"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
+      <a href="clustering.html" class="nav-link"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
+      <a href="hasil.html"      class="nav-link"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
     </nav>
     <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
-      <button onclick="window._logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
+      <button onclick="window._logout()" class="nav-link-logout"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <div id="toast-container"></div>
-    <div class="max-w-5xl mx-auto">
-
-      <!-- Header -->
-      <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
-        <div>
-          <h1 style="color:#f9fafb; font-size:28px; font-weight:900;">Upload Data</h1>
-          <p style="color:rgba(255,255,255,0.35); font-size:14px; margin-top:4px;">Impor berkas Excel atau PDF untuk diproses ke database sistem</p>
-        </div>
-        <div class="chip-ai"><span class="chip-ai-dot"></span> Siap menerima data</div>
+  <div class="content-wrapper">
+    <!-- MOBILE TOPBAR -->
+    <div class="mobile-topbar">
+      <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars" style="font-size:15px;"></i></button>
+      <div style="display:flex; align-items:center; gap:8px; flex:1;">
+        <div class="nav-logo-ring" style="width:30px;height:30px;border-radius:8px;"><i class="fas fa-leaf text-white" style="font-size:12px;"></i></div>
+        <span style="color:#f9fafb; font-size:14px; font-weight:700;">Upload Data</span>
       </div>
+      <div class="chip-ai" style="font-size:11px; padding:5px 10px;"><span class="chip-ai-dot"></span>Siap</div>
+    </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <main>
+      <div id="toast-container"></div>
+      <div class="main-inner">
 
-        <!-- KIRI: Upload area -->
-        <div class="space-y-5">
-
-          <!-- Dropzone card -->
-          <div class="content-card fade-up fade-up-1">
-            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-              <div class="title-icon" style="background:rgba(16,185,129,0.15);">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              </div>
-              Area Unggah Berkas
-            </div>
-
-            <div id="dropzone" class="dropzone mb-5"
-              onclick="document.getElementById('inp-file').click()"
-              ondragover="event.preventDefault();this.classList.add('drag-over')"
-              ondragleave="this.classList.remove('drag-over')"
-              ondrop="handleDrop(event)">
-              <div class="dropzone-icon">
-                <svg id="dz-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><rect x="8" y="12" width="8" height="2" rx="1"/><rect x="8" y="16" width="5" height="2" rx="1"/></svg>
-              </div>
-              <div class="dropzone-title" id="dz-title">Letakkan file di sini atau klik untuk pilih</div>
-              <div class="dropzone-sub" id="dz-sub">Excel saja (.xlsx / .xls) · Maks 20MB · Auto-clean aktif</div>
-              <input id="inp-file" type="file" accept=".xlsx,.xls,.pdf" class="hidden" onchange="pilihFile(this.files[0])">
-            </div>
-
-            <!-- Mode -->
-            <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px;">Opsi Penggantian Data</p>
-            <div class="grid grid-cols-2 gap-3 mb-5">
-              <div id="btn-replace" class="mode-btn active" onclick="setMode('replace')">
-                <div class="mode-icon" style="background:rgba(16,185,129,0.15);">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                </div>
-                <div class="mode-title">Ganti Data</div>
-                <div class="mode-sub">Hapus & timpa baru</div>
-              </div>
-              <div id="btn-append" class="mode-btn" onclick="setMode('append')">
-                <div class="mode-icon" style="background:rgba(59,130,246,0.12);">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </div>
-                <div class="mode-title">Tambah Data</div>
-                <div class="mode-sub">Gabung data lama</div>
-              </div>
-            </div>
-
-            <div id="upload-error" class="hidden mb-4" style="background:rgba(127,29,29,0.3); border:1px solid rgba(248,113,113,0.2); color:#fca5a5; font-size:12px; font-weight:600; padding:12px 16px; border-radius:12px;"></div>
-
-            <button id="btn-upload" onclick="doUpload()" disabled class="btn-upload-main">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Mulai Proses Sinkronisasi
-            </button>
+        <!-- HEADER -->
+        <div class="page-header fade-up">
+          <div>
+            <h1>Upload Data</h1>
+            <p>Impor berkas Excel untuk diproses ke database sistem</p>
           </div>
-
-          <!-- Success -->
-          <div id="hasil-upload" class="hidden success-card fade-up">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-              <div style="width:32px; height:32px; background:rgba(52,211,153,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <span style="font-size:13px; font-weight:700; color:#6ee7b7; text-transform:uppercase; letter-spacing:0.06em;">Berhasil Diunggah</span>
-            </div>
-            <div id="hasil-detail"></div>
-            <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; margin-top:16px; background:rgba(255,255,255,0.1); color:#f9fafb; font-size:13px; font-weight:700; padding:10px 20px; border-radius:12px; text-decoration:none; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-              <i class="fas fa-cogs"></i> Menuju Clustering →
-            </a>
-          </div>
+          <div class="chip-ai"><span class="chip-ai-dot"></span>Siap menerima data</div>
         </div>
 
-        <!-- KANAN: Format info + Riwayat -->
-        <div class="space-y-5">
+        <div class="upload-grid">
 
-          <!-- Format -->
-          <div class="content-card fade-up fade-up-2">
-            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-              <div class="title-icon" style="background:rgba(59,130,246,0.12);">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <!-- KIRI: Upload -->
+          <div>
+            <div class="content-card fade-up fade-up-1">
+              <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+                <div class="title-icon" style="background:rgba(16,185,129,0.15);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                Area Unggah Berkas
               </div>
-              Standar Format
+
+              <div id="dropzone" class="dropzone" style="margin-bottom:16px;"
+                onclick="document.getElementById('inp-file').click()"
+                ondragover="event.preventDefault();this.classList.add('drag-over')"
+                ondragleave="this.classList.remove('drag-over')"
+                ondrop="handleDrop(event)">
+                <div class="dropzone-icon">
+                  <svg id="dz-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><rect x="8" y="12" width="8" height="2" rx="1"/><rect x="8" y="16" width="5" height="2" rx="1"/></svg>
+                </div>
+                <div class="dropzone-title" id="dz-title">Ketuk untuk pilih file</div>
+                <div class="dropzone-sub" id="dz-sub">Excel saja (.xlsx / .xls) · Maks 20MB</div>
+                <input id="inp-file" type="file" accept=".xlsx,.xls,.pdf" class="hidden" onchange="pilihFile(this.files[0])">
+              </div>
+
+              <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px;">Opsi Penggantian Data</p>
+              <div class="mode-grid">
+                <div id="btn-replace" class="mode-btn active" onclick="setMode('replace')">
+                  <div class="mode-icon" style="background:rgba(16,185,129,0.15);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  </div>
+                  <div class="mode-title">Ganti Data</div>
+                  <div class="mode-sub">Hapus & timpa baru</div>
+                </div>
+                <div id="btn-append" class="mode-btn" onclick="setMode('append')">
+                  <div class="mode-icon" style="background:rgba(59,130,246,0.12);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </div>
+                  <div class="mode-title">Tambah Data</div>
+                  <div class="mode-sub">Gabung data lama</div>
+                </div>
+              </div>
+
+              <div id="upload-error" class="hidden" style="background:rgba(127,29,29,0.3); border:1px solid rgba(248,113,113,0.2); color:#fca5a5; font-size:12px; font-weight:600; padding:12px 14px; border-radius:12px; margin-bottom:14px;"></div>
+
+              <button id="btn-upload" onclick="doUpload()" disabled class="btn-upload-main">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Mulai Proses Sinkronisasi
+              </button>
             </div>
-            <div>
-              <div class="format-step">
-                <div class="format-num">1</div>
-                <div>
-                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:8px;">Struktur Kolom Utama</p>
-                  <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Nama Barang</span>
-                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Qty</span>
-                    <span style="padding:4px 10px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Total</span>
+
+            <!-- Success -->
+            <div id="hasil-upload" class="hidden success-card fade-up">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                <div style="width:30px; height:30px; background:rgba(52,211,153,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span style="font-size:12px; font-weight:700; color:#6ee7b7; text-transform:uppercase; letter-spacing:0.06em;">Berhasil Diunggah</span>
+              </div>
+              <div id="hasil-detail"></div>
+              <a href="clustering.html" style="display:inline-flex; align-items:center; gap:8px; margin-top:14px; background:rgba(255,255,255,0.1); color:#f9fafb; font-size:13px; font-weight:700; padding:10px 18px; border-radius:12px; text-decoration:none;">
+                <i class="fas fa-cogs"></i> Menuju Clustering →
+              </a>
+            </div>
+          </div>
+
+          <!-- KANAN: Format + Riwayat -->
+          <div>
+            <div class="content-card fade-up fade-up-2">
+              <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+                <div class="title-icon" style="background:rgba(59,130,246,0.12);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                Standar Format
+              </div>
+              <div>
+                <div class="format-step">
+                  <div class="format-num">1</div>
+                  <div>
+                    <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:7px;">Kolom Utama</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                      <span style="padding:3px 9px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Nama Barang</span>
+                      <span style="padding:3px 9px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Qty</span>
+                      <span style="padding:3px 9px; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(52,211,153,0.2); border-radius:8px; font-size:11px; font-weight:700;">Total</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="format-step">
+                  <div class="format-num">2</div>
+                  <div>
+                    <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:3px;">Auto-clean otomatis</p>
+                    <p style="font-size:11px; color:rgba(255,255,255,0.35); line-height:1.6;">Baris kosong, total, format angka Rp, dan header ganda dibuang otomatis.</p>
+                  </div>
+                </div>
+                <div class="format-step">
+                  <div class="format-num">3</div>
+                  <div>
+                    <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:3px;">Format & Ukuran</p>
+                    <p style="font-size:11px; color:rgba(255,255,255,0.35); line-height:1.6;">Hanya <strong style="color:#34d399;">.xlsx</strong> / <strong style="color:#34d399;">.xls</strong> · Maks 20 MB · Multi-sheet didukung</p>
                   </div>
                 </div>
               </div>
-              <div class="format-step">
-                <div class="format-num">2</div>
-                <div>
-                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:4px;">Auto-clean otomatis</p>
-                  <p style="font-size:12px; color:rgba(255,255,255,0.35); line-height:1.6;">File berantakan dari sistem kasir apapun langsung dibersihkan — baris kosong, baris total, format angka Rp, dan header ganda dibuang otomatis.</p>
-                </div>
-              </div>
-              <div class="format-step">
-                <div class="format-num">3</div>
-                <div>
-                  <p style="font-size:13px; font-weight:700; color:#f9fafb; margin-bottom:4px;">Format & Ukuran</p>
-                  <p style="font-size:12px; color:rgba(255,255,255,0.35); line-height:1.6;">Hanya <strong style="color:#34d399;">.xlsx</strong> atau <strong style="color:#34d399;">.xls</strong> · Maksimal 20 MB · Multi-sheet didukung (sheet paling banyak data dipakai)</p>
-                </div>
-              </div>
             </div>
-          </div>
 
-          <!-- Riwayat -->
-          <div class="content-card fade-up fade-up-3">
-            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-              <div class="title-icon" style="background:rgba(255,255,255,0.06);">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="content-card fade-up fade-up-3">
+              <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+                <div class="title-icon" style="background:rgba(255,255,255,0.06);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                Riwayat Upload Terakhir
               </div>
-              Riwayat Upload Terakhir
-            </div>
-            <div id="riwayat-list">
-              <div style="font-size:12px; color:rgba(255,255,255,0.25); font-style:italic; text-align:center; padding:20px 0;">Menghubungkan ke database...</div>
+              <div id="riwayat-list">
+                <div style="font-size:12px; color:rgba(255,255,255,0.25); font-style:italic; text-align:center; padding:18px 0;">Menghubungkan ke database...</div>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
+</div>
 
-  <script src="assets/js/config.js"></script>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-    import { formatAngka, toast } from './assets/js/utils.js'
-    import { apiUploadFile, apiGetRiwayatUpload, apiHapusUpload } from './assets/js/api.js'
+<script>
+function openSidebar()  { document.getElementById('sidebar').classList.add('sidebar-open'); document.getElementById('sidebar-overlay').classList.add('active'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('sidebar-open'); document.getElementById('sidebar-overlay').classList.remove('active'); }
+</script>
 
-    const app = initializeApp(FIREBASE_CONFIG)
-    const auth = getAuth(app)
+<script src="assets/js/config.js"></script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+  import { formatAngka, toast } from './assets/js/utils.js'
+  import { apiUploadFile, apiGetRiwayatUpload, apiHapusUpload } from './assets/js/api.js'
 
-    window._logout = async () => {
-      if (confirm('Yakin ingin keluar?')) { await signOut(auth); localStorage.clear(); location.href='index.html' }
-    }
+  const app=initializeApp(FIREBASE_CONFIG); const auth=getAuth(app)
+  window._logout=async()=>{ if(confirm('Yakin ingin keluar?')){ await signOut(auth); localStorage.clear(); location.href='index.html' } }
 
-    let selectedFile = null, selectedMode = 'replace'
+  let selectedFile=null, selectedMode='replace'
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) { location.href='index.html'; return }
+  onAuthStateChanged(auth, async user=>{ if(!user){ location.href='index.html'; return } muatRiwayat() })
+
+  window.handleDrop=e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; document.getElementById('dropzone').classList.remove('drag-over'); if(f) pilihFile(f) }
+
+  window.pilihFile=file=>{
+    if(!file) return
+    if(!file.name.match(/\.(xlsx|xls)$/i)){ toast('Hanya file Excel (.xlsx / .xls) yang diterima','error'); return }
+    selectedFile=file
+    document.getElementById('dz-title').textContent=file.name
+    document.getElementById('dz-sub').textContent=`${(file.size/1024/1024).toFixed(2)} MB · Ketuk untuk ganti`
+    document.getElementById('btn-upload').disabled=false
+  }
+
+  window.setMode=mode=>{
+    selectedMode=mode
+    document.getElementById('btn-replace').classList.toggle('active',mode==='replace')
+    document.getElementById('btn-append').classList.toggle('active',mode==='append')
+  }
+
+  window.doUpload=async()=>{
+    if(!selectedFile) return
+    const btn=document.getElementById('btn-upload')
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...'
+    btn.disabled=true
+    document.getElementById('upload-error').classList.add('hidden')
+    try {
+      const hasil=await apiUploadFile(selectedFile,selectedMode)
+      document.getElementById('hasil-upload').classList.remove('hidden')
+      document.getElementById('hasil-detail').innerHTML=`
+        <div class="hasil-detail-grid">
+          <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:12px;text-align:center;">
+            <div style="font-size:18px;font-weight:900;color:#f9fafb;font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.total_baris)}</div>
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-top:4px;">Total Baris</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:12px;text-align:center;">
+            <div style="font-size:18px;font-weight:900;color:#34d399;font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.valid_baris)}</div>
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-top:4px;">Baris Valid</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:12px;text-align:center;">
+            <div style="font-size:18px;font-weight:900;color:#60a5fa;font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.produk_unik)}</div>
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-top:4px;">Produk Unik</div>
+          </div>
+        </div>
+        ${hasil.dibuang>0?`<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:10px;margin-bottom:10px;font-size:12px;color:rgba(253,230,138,0.8);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          ${hasil.dibuang} baris dibuang (kosong/total/tidak lengkap)
+        </div>`:''}
+        <p style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">${hasil.pesan}</p>
+      `
+      toast('Upload berhasil!','success')
       muatRiwayat()
-    })
-
-    window.handleDrop = e => {
-      e.preventDefault()
-      const f = e.dataTransfer.files[0]
-      document.getElementById('dropzone').classList.remove('drag-over')
-      if (f) pilihFile(f)
+    } catch(e) {
+      const errEl=document.getElementById('upload-error')
+      errEl.textContent='⚠ '+e.message; errEl.classList.remove('hidden')
+      toast(e.message,'error')
+    } finally {
+      btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Mulai Proses Sinkronisasi'
+      btn.disabled=false
     }
+  }
 
-    window.pilihFile = file => {
-      if (!file) return
-      // Excel only — tolak PDF
-      if (!file.name.match(/\.(xlsx|xls)$/i)) {
-        toast('Hanya file Excel (.xlsx / .xls) yang diterima', 'error')
-        return
-      }
-      selectedFile = file
-      document.getElementById('dz-title').textContent = file.name
-      document.getElementById('dz-sub').textContent = `${(file.size/1024/1024).toFixed(2)} MB · Klik untuk ganti`
-      document.getElementById('dz-svg').setAttribute('stroke', '#34d399')
-      document.getElementById('btn-upload').disabled = false
-    }
+  window.hapusRiwayat=async(id,namaFile)=>{
+    if(!confirm(`Hapus "${namaFile}"?\n\nData pivot dan hasil clustering terkait akan ikut dihapus.`)) return
+    try { await apiHapusUpload(id); toast(`"${namaFile}" berhasil dihapus`,'success'); muatRiwayat() }
+    catch(e) { toast('Gagal menghapus: '+e.message,'error') }
+  }
 
-    window.setMode = mode => {
-      selectedMode = mode
-      document.getElementById('btn-replace').classList.toggle('active', mode === 'replace')
-      document.getElementById('btn-append').classList.toggle('active', mode === 'append')
-    }
-
-    window.doUpload = async () => {
-      if (!selectedFile) return
-      const btn = document.getElementById('btn-upload')
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membersihkan & Memproses...'
-      btn.disabled = true
-      document.getElementById('upload-error').classList.add('hidden')
-      try {
-        const hasil = await apiUploadFile(selectedFile, selectedMode)
-        document.getElementById('hasil-upload').classList.remove('hidden')
-        document.getElementById('hasil-detail').innerHTML = `
-          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;">
-            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
-              <div style="font-size:20px; font-weight:900; color:#f9fafb; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.total_baris)}</div>
-              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Total Baris</div>
+  async function muatRiwayat() {
+    try {
+      const data=await apiGetRiwayatUpload()
+      if(!data.length){ document.getElementById('riwayat-list').innerHTML='<div style="font-size:12px;color:rgba(255,255,255,0.2);text-align:center;padding:18px 0;font-style:italic;">Belum ada riwayat upload</div>'; return }
+      document.getElementById('riwayat-list').innerHTML=data.map(r=>`
+        <div class="riwayat-item">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(59,130,246,0.12);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
             </div>
-            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
-              <div style="font-size:20px; font-weight:900; color:#34d399; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.valid_baris)}</div>
-              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Baris Valid</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.nama_file}</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">${new Date(r.created_at).toLocaleDateString('id-ID')} · ${formatAngka(r.valid_baris)} baris · ${formatAngka(r.produk_unik)} produk${r.dibuang>0?` · <span style="color:rgba(251,191,36,0.5)">${r.dibuang} dibuang</span>`:''}</div>
             </div>
-            <div style="background:rgba(255,255,255,0.08); padding:14px; border-radius:12px; text-align:center;">
-              <div style="font-size:20px; font-weight:900; color:#60a5fa; font-family:'JetBrains Mono',monospace;">${formatAngka(hasil.produk_unik)}</div>
-              <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-top:4px;">Produk Unik</div>
-            </div>
+            <button onclick="hapusRiwayat('${r.id}','${r.nama_file.replace(/'/g,"\\'")}')" title="Hapus"
+              style="width:28px;height:28px;border-radius:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;"
+              onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
           </div>
-          ${hasil.dibuang > 0 ? `<div style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); border-radius:10px; margin-bottom:12px; font-size:12px; color:rgba(253,230,138,0.8);">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            ${hasil.dibuang} baris dibuang otomatis (baris kosong / total / tidak lengkap)
-          </div>` : ''}
-          <p style="font-size:12px; color:rgba(255,255,255,0.55); line-height:1.6;">${hasil.pesan}</p>
-          ${hasil.sheet ? `<p style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:6px;">Sheet dibaca: <strong style="color:rgba(255,255,255,0.5);">${hasil.sheet}</strong></p>` : ''}
-        `
-        toast('Upload & auto-clean berhasil!', 'success')
-        muatRiwayat()
-      } catch(e) {
-        const errEl = document.getElementById('upload-error')
-        errEl.textContent = '⚠ ' + e.message
-        errEl.classList.remove('hidden')
-        toast(e.message, 'error')
-      } finally {
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Mulai Proses Sinkronisasi'
-        btn.disabled = false
-      }
+        </div>
+      `).join('')
+    } catch(e) {
+      document.getElementById('riwayat-list').innerHTML='<div style="font-size:12px;color:#f87171;padding:12px;">Error memuat riwayat</div>'
     }
-
-    // Hapus riwayat
-    window.hapusRiwayat = async (id, namaFile) => {
-      if (!confirm(`Hapus "${namaFile}"?\n\nData pivot dan hasil clustering terkait akan ikut dihapus.`)) return
-      try {
-        const hasil = await apiHapusUpload(id)
-        toast(`"${namaFile}" berhasil dihapus`, 'success')
-        muatRiwayat()
-      } catch(e) {
-        toast('Gagal menghapus: ' + e.message, 'error')
-      }
-    }
-
-    async function muatRiwayat() {
-      try {
-        const data = await apiGetRiwayatUpload()
-        if (!data.length) {
-          document.getElementById('riwayat-list').innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.2); text-align:center; padding:20px 0; font-style:italic;">Belum ada riwayat upload</div>'
-          return
-        }
-        document.getElementById('riwayat-list').innerHTML = data.map(r => `
-          <div class="riwayat-item" style="padding:12px 14px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <div style="width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(59,130,246,0.12);">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-              </div>
-              <div style="flex:1; min-width:0;">
-                <div style="font-size:12px; font-weight:600; color:rgba(255,255,255,0.8); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.nama_file}</div>
-                <div style="font-size:10px; color:rgba(255,255,255,0.3); margin-top:2px;">
-                  ${new Date(r.created_at).toLocaleDateString('id-ID')} · ${formatAngka(r.valid_baris)} baris · ${formatAngka(r.produk_unik)} produk
-                  ${r.dibuang > 0 ? `<span style="color:rgba(251,191,36,0.5); margin-left:4px;">· ${r.dibuang} dibuang</span>` : ''}
-                </div>
-              </div>
-              <button
-                onclick="hapusRiwayat('${r.id}', '${r.nama_file.replace(/'/g,"\\'")}')"
-                title="Hapus file ini"
-                style="width:30px; height:30px; border-radius:8px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.15); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;"
-                onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.borderColor='rgba(248,113,113,0.4)'"
-                onmouseout="this.style.background='rgba(239,68,68,0.08)'; this.style.borderColor='rgba(239,68,68,0.15)'">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-              </button>
-            </div>
-          </div>
-        `).join('')
-      } catch(e) {
-        document.getElementById('riwayat-list').innerHTML = '<div style="font-size:12px; color:#f87171; padding:12px;">Error memuat riwayat</div>'
-      }
-    }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'))
-    }
-  </script>
+  }
+</script>
+<script>if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))</script>
 </body>
 </html>

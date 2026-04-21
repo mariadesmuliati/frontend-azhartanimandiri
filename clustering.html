@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Clustering — ClusterToko</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="manifest" href="manifest.json">
@@ -10,325 +10,300 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
-    * { box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1117; background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px); background-size: 40px 40px; min-height: 100vh; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    aside { background: linear-gradient(180deg, #111827 0%, #0f1117 100%); border-right: 1px solid rgba(255,255,255,0.06); }
-    .nav-logo-ring { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.4); }
-    .nav-link { color: rgba(255,255,255,0.4); transition: all 0.2s; border-radius: 14px; }
-    .nav-link:hover { background: rgba(16,185,129,0.1); color: #34d399; }
-    .nav-link.active { background: linear-gradient(135deg, rgba(5,150,105,0.25), rgba(4,120,87,0.15)); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
-    .nav-link-logout { color: rgba(248,113,113,0.6); transition: all 0.2s; border-radius: 14px; }
-    .nav-link-logout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
-    .chip-ai { background: rgba(5,150,105,0.15); border: 1px solid rgba(52,211,153,0.25); color: #34d399; border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
-    .chip-ai-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse-dot 2s ease infinite; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Plus Jakarta Sans',sans-serif; background-color:#0f1117; background-image:linear-gradient(rgba(16,185,129,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.04) 1px,transparent 1px); background-size:40px 40px; min-height:100vh; overflow-x:hidden; }
+    .mono { font-family:'JetBrains Mono',monospace; }
+
+    .app-wrapper { display:flex; min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    aside { width:256px; flex-shrink:0; background:linear-gradient(180deg,#111827 0%,#0f1117 100%); border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; height:100vh; position:sticky; top:0; z-index:50; }
+    @media (max-width:768px) { aside { position:fixed; top:0; left:0; height:100vh; width:240px; transform:translateX(-100%); transition:transform 0.3s ease; z-index:200; box-shadow:4px 0 24px rgba(0,0,0,0.5); } aside.sidebar-open { transform:translateX(0); } }
+    #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:199; backdrop-filter:blur(2px); }
+    #sidebar-overlay.active { display:block; }
+
+    /* ── MOBILE TOPBAR ── */
+    .mobile-topbar { display:none; position:sticky; top:0; z-index:100; background:#111827; border-bottom:1px solid rgba(255,255,255,0.06); padding:12px 16px; align-items:center; gap:12px; }
+    @media (max-width:768px) { .mobile-topbar { display:flex; } }
+    .hamburger-btn { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:rgba(255,255,255,0.7); flex-shrink:0; }
+
+    /* ── NAV ── */
+    .nav-logo-ring { background:linear-gradient(135deg,#059669,#047857); box-shadow:0 0 20px rgba(5,150,105,0.4); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .nav-link { color:rgba(255,255,255,0.4); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; text-decoration:none; }
+    .nav-link:hover { background:rgba(16,185,129,0.1); color:#34d399; }
+    .nav-link.active { background:linear-gradient(135deg,rgba(5,150,105,0.25),rgba(4,120,87,0.15)); color:#34d399; border:1px solid rgba(52,211,153,0.2); font-weight:600; }
+    .nav-link-logout { color:rgba(248,113,113,0.6); transition:all 0.2s; border-radius:14px; display:flex; align-items:center; gap:12px; padding:12px 16px; font-size:14px; font-weight:500; width:100%; background:none; border:none; cursor:pointer; }
+    .nav-link-logout:hover { background:rgba(239,68,68,0.1); color:#f87171; }
+
+    /* ── MAIN ── */
+    .content-wrapper { flex:1; min-width:0; display:flex; flex-direction:column; }
+    main { flex:1; overflow-y:auto; overflow-x:hidden; }
+    .main-inner { max-width:900px; margin:0 auto; padding:32px; }
+    @media (max-width:768px) { .main-inner { padding:16px; } }
+
+    /* ── CARDS ── */
+    .content-card { background:rgba(17,24,39,0.8); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:24px; margin-bottom:16px; }
+    @media (max-width:480px) { .content-card { padding:16px; border-radius:16px; } }
+    .title-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+    /* ── HEADER ── */
+    .page-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:24px; }
+    .page-header h1 { color:#f9fafb; font-size:clamp(20px,4vw,28px); font-weight:900; }
+    .page-header p { color:rgba(255,255,255,0.35); font-size:13px; margin-top:4px; }
+
+    .chip-ai { background:rgba(5,150,105,0.15); border:1px solid rgba(52,211,153,0.25); color:#34d399; border-radius:20px; padding:7px 14px; font-size:12px; font-weight:600; display:flex; align-items:center; gap:7px; white-space:nowrap; }
+    .chip-ai-dot { width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981; animation:pulse-dot 2s ease infinite; flex-shrink:0; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-    .content-card { background: rgba(17,24,39,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 28px; }
-    .title-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    /* Centroid cards */
-    .centroid-card { border-radius: 16px; padding: 20px; border: 1px solid; }
-    .centroid-green { background: linear-gradient(135deg, rgba(20,83,45,0.4), rgba(22,101,52,0.2)); border-color: rgba(74,222,128,0.2); }
-    .centroid-amber { background: linear-gradient(135deg, rgba(120,53,15,0.4), rgba(146,64,14,0.2)); border-color: rgba(251,191,36,0.2); }
-    .centroid-red   { background: linear-gradient(135deg, rgba(127,29,29,0.4), rgba(153,27,27,0.2)); border-color: rgba(252,165,165,0.2); }
-    .centroid-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
-    .centroid-green .centroid-label { color: #86efac; }
-    .centroid-amber .centroid-label { color: #fde68a; }
-    .centroid-red   .centroid-label { color: #fca5a5; }
-    .centroid-input {
-        width: 100%;
-        background: rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        padding: 10px 14px;
-        color: #f9fafb;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 13px;
-        font-weight: 600;
-        outline: none;
-        transition: border-color 0.2s;
-        margin-bottom: 10px;
-    }
-    .centroid-input:focus { border-color: rgba(52,211,153,0.4); }
-    .centroid-input::placeholder { color: rgba(255,255,255,0.2); }
-    .input-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    /* ── CENTROID GRID ── */
+    .centroid-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+    @media (max-width:600px) { .centroid-grid { grid-template-columns:1fr; gap:10px; } }
 
-    /* Run button */
-    .btn-run {
-        width: 100%;
-        background: linear-gradient(135deg, #059669, #047857);
-        color: #fff;
-        font-weight: 800;
-        font-size: 14px;
-        padding: 18px;
-        border-radius: 14px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.4);
-        display: flex; align-items: center; justify-content: center; gap: 12px;
-        letter-spacing: 0.03em;
-    }
-    .btn-run:hover { box-shadow: 0 8px 40px rgba(5,150,105,0.55); transform: translateY(-2px); }
-    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .centroid-card { border-radius:16px; padding:18px; border:1px solid; }
+    .centroid-green { background:linear-gradient(135deg,rgba(20,83,45,0.4),rgba(22,101,52,0.2)); border-color:rgba(74,222,128,0.2); }
+    .centroid-amber { background:linear-gradient(135deg,rgba(120,53,15,0.4),rgba(146,64,14,0.2)); border-color:rgba(251,191,36,0.2); }
+    .centroid-red   { background:linear-gradient(135deg,rgba(127,29,29,0.4),rgba(153,27,27,0.2)); border-color:rgba(252,165,165,0.2); }
+    .centroid-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:12px; }
+    .centroid-green .centroid-label { color:#86efac; }
+    .centroid-amber .centroid-label { color:#fde68a; }
+    .centroid-red   .centroid-label { color:#fca5a5; }
+    .centroid-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:9px 12px; color:#f9fafb; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; margin-bottom:8px; }
+    .centroid-input:focus { border-color:rgba(52,211,153,0.4); }
+    .centroid-input::placeholder { color:rgba(255,255,255,0.2); }
+    .input-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px; }
 
-    /* Result card */
-    .result-card {
-        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-        border: 1px solid rgba(52,211,153,0.2);
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow: 0 8px 40px rgba(5,150,105,0.25);
-    }
-    .result-metric { text-align: center; }
-    .result-metric-val { font-size: 32px; font-weight: 900; color: #fff; font-family: 'JetBrains Mono', monospace; line-height: 1; margin-bottom: 6px; }
-    .result-metric-lbl { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.07em; }
+    .btn-run { width:100%; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-weight:800; font-size:14px; padding:16px; border-radius:14px; border:none; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 20px rgba(5,150,105,0.4); display:flex; align-items:center; justify-content:center; gap:10px; }
+    .btn-run:hover { box-shadow:0 8px 36px rgba(5,150,105,0.55); transform:translateY(-2px); }
+    .btn-run:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn-reset { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); border-radius:10px; padding:7px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-reset:hover { background:rgba(16,185,129,0.1); color:#34d399; border-color:rgba(52,211,153,0.3); }
 
-    /* Sil bar */
-    .sil-segment { height: 6px; transition: width 0.6s ease; }
+    /* ── RESULT ── */
+    .result-card { background:linear-gradient(135deg,#064e3b 0%,#065f46 100%); border:1px solid rgba(52,211,153,0.2); border-radius:20px; padding:24px; box-shadow:0 8px 36px rgba(5,150,105,0.25); margin-bottom:16px; }
+    .result-metrics-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    @media (max-width:480px) { .result-metrics-grid { grid-template-columns:repeat(2,1fr); } }
+    .result-metric { text-align:center; }
+    .result-metric-val { font-size:clamp(22px,5vw,32px); font-weight:900; color:#fff; font-family:'JetBrains Mono',monospace; line-height:1; margin-bottom:5px; }
+    .result-metric-lbl { font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.07em; }
 
-    /* Reset btn */
-    .btn-reset {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.08);
-        color: rgba(255,255,255,0.4);
-        border-radius: 10px;
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .btn-reset:hover { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(52,211,153,0.3); }
+    .ringkasan-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    @media (max-width:480px) { .ringkasan-grid { grid-template-columns:1fr; gap:8px; } }
 
-    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.3); border-radius: 3px; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation: fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s} .fade-up-3{animation-delay:.18s}
+    ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:#0f1117; } ::-webkit-scrollbar-thumb { background:rgba(16,185,129,0.3); border-radius:3px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp 0.4s ease both; } .fade-up-1{animation-delay:.06s} .fade-up-2{animation-delay:.12s}
     #toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
-    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:320px; animation:fadeUp .3s ease; }
+    .toast { padding:.75rem 1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; max-width:300px; animation:fadeUp .3s ease; }
     .toast-success { background:#064e3b; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
-    .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+    .toast-error   { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
   </style>
 </head>
-<body class="min-h-screen flex">
+<body>
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 flex flex-col h-screen sticky top-0 z-50">
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-wrapper">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside id="sidebar">
     <div class="p-6 pb-4">
       <div class="flex items-center gap-3">
-        <div class="nav-logo-ring w-10 h-10 rounded-xl flex items-center justify-center">
-          <i class="fas fa-leaf text-white text-lg"></i>
-        </div>
-        <span class="text-lg font-bold tracking-tight" style="color:#f9fafb;">Azhar Tani</span>
+        <div class="nav-logo-ring"><i class="fas fa-leaf text-white text-base"></i></div>
+        <span style="color:#f9fafb; font-size:16px; font-weight:700;">Azhar Tani</span>
       </div>
     </div>
     <nav class="flex-1 px-4 space-y-1 mt-2">
-      <a href="dashboard.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
-      <a href="upload.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
-      <a href="clustering.html" class="nav-link active flex items-center gap-3 px-4 py-3 font-semibold text-sm"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
-      <a href="hasil.html" class="nav-link flex items-center gap-3 px-4 py-3 font-medium text-sm"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
+      <a href="dashboard.html"  class="nav-link"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+      <a href="upload.html"     class="nav-link"><i class="fas fa-cloud-upload-alt w-4 text-center"></i> Upload Data</a>
+      <a href="clustering.html" class="nav-link active"><i class="fas fa-braille w-4 text-center"></i> Clustering</a>
+      <a href="hasil.html"      class="nav-link"><i class="fas fa-poll-h w-4 text-center"></i> Hasil & Saran</a>
     </nav>
     <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
-      <button onclick="_logout()" class="nav-link-logout flex items-center gap-3 px-4 py-3 w-full font-medium text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
+      <button onclick="_logout()" class="nav-link-logout"><i class="fas fa-sign-out-alt w-4 text-center"></i> Keluar</button>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <div id="toast-container"></div>
-    <div class="max-w-4xl mx-auto">
-
-      <!-- Header -->
-      <div class="flex flex-wrap justify-between items-start gap-4 mb-8 fade-up">
-        <div>
-          <h1 style="color:#f9fafb; font-size:28px; font-weight:900;">Clustering K-Means</h1>
-          <p style="color:rgba(255,255,255,0.35); font-size:14px; margin-top:4px;">Atur centroid awal dan jalankan analisis pengelompokkan produk</p>
-        </div>
-        <div class="chip-ai"><span class="chip-ai-dot"></span> K=3 siap dijalankan</div>
+  <div class="content-wrapper">
+    <!-- MOBILE TOPBAR -->
+    <div class="mobile-topbar">
+      <button class="hamburger-btn" onclick="openSidebar()"><i class="fas fa-bars" style="font-size:15px;"></i></button>
+      <div style="display:flex; align-items:center; gap:8px; flex:1;">
+        <div class="nav-logo-ring" style="width:30px;height:30px;border-radius:8px;"><i class="fas fa-leaf text-white" style="font-size:12px;"></i></div>
+        <span style="color:#f9fafb; font-size:14px; font-weight:700;">Clustering</span>
       </div>
+      <div class="chip-ai" style="font-size:11px; padding:5px 10px;"><span class="chip-ai-dot"></span>K=3</div>
+    </div>
 
-      <!-- Centroid settings -->
-      <div class="content-card mb-6 fade-up fade-up-1">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px;">
-            <div class="title-icon" style="background:rgba(16,185,129,0.15);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-            </div>
-            Pengaturan Centroid Awal
+    <main>
+      <div id="toast-container"></div>
+      <div class="main-inner">
+
+        <!-- HEADER -->
+        <div class="page-header fade-up">
+          <div>
+            <h1>Clustering K-Means</h1>
+            <p>Atur centroid awal dan jalankan analisis pengelompokkan produk</p>
           </div>
-          <button onclick="resetCentroid()" class="btn-reset">
-            <i class="fas fa-undo-alt mr-1"></i> Reset Default
+          <div class="chip-ai"><span class="chip-ai-dot"></span>K=3 siap dijalankan</div>
+        </div>
+
+        <!-- CENTROID SETTINGS -->
+        <div class="content-card fade-up fade-up-1">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px;">
+              <div class="title-icon" style="background:rgba(16,185,129,0.15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              Pengaturan Centroid Awal
+            </div>
+            <button onclick="resetCentroid()" class="btn-reset"><i class="fas fa-undo-alt mr-1"></i> Reset Default</button>
+          </div>
+
+          <div class="centroid-grid">
+            <div class="centroid-card centroid-green">
+              <div class="centroid-label">Cluster 1 — Paling Laris</div>
+              <div class="input-label">Qty (Normalized)</div>
+              <input id="c1-qty" type="number" step="0.0001" value="0.6157" class="centroid-input">
+              <div class="input-label">Total (Normalized)</div>
+              <input id="c1-total" type="number" step="0.0001" value="0.1505" class="centroid-input" style="margin-bottom:0;">
+            </div>
+            <div class="centroid-card centroid-amber">
+              <div class="centroid-label">Cluster 2 — Cukup Laris</div>
+              <div class="input-label">Qty (Normalized)</div>
+              <input id="c2-qty" type="number" step="0.0001" value="0.1116" class="centroid-input">
+              <div class="input-label">Total (Normalized)</div>
+              <input id="c2-total" type="number" step="0.0001" value="0.0322" class="centroid-input" style="margin-bottom:0;">
+            </div>
+            <div class="centroid-card centroid-red">
+              <div class="centroid-label">Cluster 3 — Kurang Laris</div>
+              <div class="input-label">Qty (Normalized)</div>
+              <input id="c3-qty" type="number" step="0.0001" value="0.0207" class="centroid-input">
+              <div class="input-label">Total (Normalized)</div>
+              <input id="c3-total" type="number" step="0.0001" value="0.0056" class="centroid-input" style="margin-bottom:0;">
+            </div>
+          </div>
+
+          <div id="cl-error" class="hidden" style="background:rgba(127,29,29,0.3); border:1px solid rgba(248,113,113,0.2); color:#fca5a5; font-size:13px; font-weight:600; padding:12px 16px; border-radius:12px; text-align:center; margin-bottom:14px;"></div>
+
+          <button id="btn-run" onclick="doJalankan()" class="btn-run">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            JALANKAN ANALISIS SEKARANG
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <!-- C1 -->
-          <div class="centroid-card centroid-green">
-            <div class="centroid-label">Cluster 1 — Paling Laris</div>
-            <div class="input-label">Qty (Normalized)</div>
-            <input id="c1-qty" type="number" step="0.0001" value="0.6157" class="centroid-input">
-            <div class="input-label">Total (Normalized)</div>
-            <input id="c1-total" type="number" step="0.0001" value="0.1505" class="centroid-input" style="margin-bottom:0;">
-          </div>
-          <!-- C2 -->
-          <div class="centroid-card centroid-amber">
-            <div class="centroid-label">Cluster 2 — Cukup Laris</div>
-            <div class="input-label">Qty (Normalized)</div>
-            <input id="c2-qty" type="number" step="0.0001" value="0.1116" class="centroid-input">
-            <div class="input-label">Total (Normalized)</div>
-            <input id="c2-total" type="number" step="0.0001" value="0.0322" class="centroid-input" style="margin-bottom:0;">
-          </div>
-          <!-- C3 -->
-          <div class="centroid-card centroid-red">
-            <div class="centroid-label">Cluster 3 — Kurang Laris</div>
-            <div class="input-label">Qty (Normalized)</div>
-            <input id="c3-qty" type="number" step="0.0001" value="0.0207" class="centroid-input">
-            <div class="input-label">Total (Normalized)</div>
-            <input id="c3-total" type="number" step="0.0001" value="0.0056" class="centroid-input" style="margin-bottom:0;">
-          </div>
-        </div>
+        <!-- HASIL -->
+        <div id="hasil-section" class="hidden">
 
-        <div id="cl-error" class="hidden mb-4" style="background:rgba(127,29,29,0.3); border:1px solid rgba(248,113,113,0.2); color:#fca5a5; font-size:13px; font-weight:600; padding:14px 18px; border-radius:12px; text-align:center;"></div>
-
-        <button id="btn-run" onclick="doJalankan()" class="btn-run">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          JALANKAN ANALISIS SEKARANG
-        </button>
-      </div>
-
-      <!-- Hasil -->
-      <div id="hasil-section" class="hidden space-y-6">
-
-        <!-- Result metrics -->
-        <div class="result-card fade-up">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
-            <div style="width:30px; height:30px; background:rgba(52,211,153,0.2); border-radius:9px; display:flex; align-items:center; justify-content:center;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <div class="result-card fade-up">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <div style="width:28px; height:28px; background:rgba(52,211,153,0.2); border-radius:9px; display:flex; align-items:center; justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span style="font-size:14px; font-weight:700; color:#f9fafb;">Clustering Berhasil</span>
             </div>
-            <span style="font-size:15px; font-weight:700; color:#f9fafb;">Clustering Berhasil</span>
-          </div>
 
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="result-metric">
-              <div class="result-metric-lbl">Iterasi</div>
-              <div class="result-metric-val" id="res-iterasi">—</div>
+            <div class="result-metrics-grid">
+              <div class="result-metric"><div class="result-metric-lbl">Iterasi</div><div class="result-metric-val" id="res-iterasi">—</div></div>
+              <div class="result-metric"><div class="result-metric-lbl">SSE Final</div><div class="result-metric-val" id="res-sse">—</div></div>
+              <div class="result-metric"><div class="result-metric-lbl">Silhouette</div><div class="result-metric-val" id="res-sil">—</div></div>
+              <div class="result-metric"><div class="result-metric-lbl">Total Produk</div><div class="result-metric-val" id="res-total">—</div></div>
             </div>
-            <div class="result-metric">
-              <div class="result-metric-lbl">SSE Final</div>
-              <div class="result-metric-val" id="res-sse">—</div>
-            </div>
-            <div class="result-metric">
-              <div class="result-metric-lbl">Silhouette</div>
-              <div class="result-metric-val" id="res-sil">—</div>
-            </div>
-            <div class="result-metric">
-              <div class="result-metric-lbl">Total Produk</div>
-              <div class="result-metric-val" id="res-total">—</div>
+
+            <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:18px;">
+              <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:12px;">Ringkasan Kelompok</p>
+              <div class="ringkasan-grid" id="ringkasan"></div>
             </div>
           </div>
 
-          <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-            <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:12px;">Ringkasan Kelompok</p>
-            <div id="ringkasan" class="grid grid-cols-3 gap-4"></div>
-          </div>
-        </div>
-
-        <!-- Silhouette quality -->
-        <div class="content-card fade-up">
-          <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-            <div class="title-icon" style="background:rgba(245,158,11,0.15);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div class="content-card fade-up fade-up-1">
+            <div style="font-size:14px; font-weight:700; color:#f9fafb; display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+              <div class="title-icon" style="background:rgba(245,158,11,0.15);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              Interpretasi Kualitas Silhouette
             </div>
-            Interpretasi Kualitas Silhouette
+            <div style="display:flex; gap:2px; border-radius:8px; overflow:hidden; margin-bottom:12px; height:7px;">
+              <div style="background:#ef4444; flex:1;"></div>
+              <div style="background:#f59e0b; flex:1;"></div>
+              <div style="background:#22c55e; flex:1;"></div>
+              <div style="background:#059669; flex:1;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:rgba(255,255,255,0.25); font-weight:600; margin-bottom:14px;">
+              <span>Kurang</span><span>Cukup</span><span>Baik</span><span>Sangat Baik</span>
+            </div>
+            <div id="sil-indicator" style="padding:14px; background:rgba(16,185,129,0.1); border:1px solid rgba(52,211,153,0.2); border-radius:12px; margin-bottom:18px;">
+              <p id="sil-ket" style="font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6;"></p>
+            </div>
+            <a href="hasil.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:13px; font-weight:700; padding:12px 20px; border-radius:12px; text-decoration:none; box-shadow:0 4px 14px rgba(5,150,105,0.35);">
+              Lihat Tabel Detail & Saran →
+            </a>
           </div>
-
-          <div style="display:flex; gap:2px; border-radius:8px; overflow:hidden; margin-bottom:14px; height:8px;">
-            <div style="background:#ef4444; flex:1;"></div>
-            <div style="background:#f59e0b; flex:1;"></div>
-            <div style="background:#22c55e; flex:1;"></div>
-            <div style="background:#059669; flex:1;"></div>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:10px; color:rgba(255,255,255,0.25); font-weight:600; margin-bottom:16px;">
-            <span>Kurang</span><span>Cukup</span><span>Baik</span><span>Sangat Baik</span>
-          </div>
-
-          <div id="sil-indicator" style="padding:16px; background:rgba(16,185,129,0.1); border:1px solid rgba(52,211,153,0.2); border-radius:12px; margin-bottom:20px;">
-            <p id="sil-ket" style="font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6;"></p>
-          </div>
-
-          <a href="hasil.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:13px; font-weight:700; padding:12px 22px; border-radius:12px; text-decoration:none; box-shadow:0 4px 16px rgba(5,150,105,0.35);">
-            Lihat Tabel Detail & Saran →
-          </a>
         </div>
 
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
+</div>
 
-  <script src="assets/js/config.js"></script>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-    import { interpretasiSil, toast } from './assets/js/utils.js'
-    import { apiJalankanClustering } from './assets/js/api.js'
+<script>
+function openSidebar()  { document.getElementById('sidebar').classList.add('sidebar-open'); document.getElementById('sidebar-overlay').classList.add('active'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('sidebar-open'); document.getElementById('sidebar-overlay').classList.remove('active'); }
+</script>
 
-    const app = initializeApp(FIREBASE_CONFIG); const auth = getAuth(app)
-    window._logout = async () => { await signOut(auth); localStorage.clear(); location.href='index.html' }
-    onAuthStateChanged(auth, user => { if (!user) location.href='index.html' })
+<script src="assets/js/config.js"></script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+  import { interpretasiSil, toast } from './assets/js/utils.js'
+  import { apiJalankanClustering } from './assets/js/api.js'
 
-    window.resetCentroid = () => {
-      document.getElementById('c1-qty').value='0.6157'; document.getElementById('c1-total').value='0.1505'
-      document.getElementById('c2-qty').value='0.1116'; document.getElementById('c2-total').value='0.0322'
-      document.getElementById('c3-qty').value='0.0207'; document.getElementById('c3-total').value='0.0056'
+  const app=initializeApp(FIREBASE_CONFIG); const auth=getAuth(app)
+  window._logout=async()=>{ await signOut(auth); localStorage.clear(); location.href='index.html' }
+  onAuthStateChanged(auth, user=>{ if(!user) location.href='index.html' })
+
+  window.resetCentroid=()=>{
+    document.getElementById('c1-qty').value='0.6157'; document.getElementById('c1-total').value='0.1505'
+    document.getElementById('c2-qty').value='0.1116'; document.getElementById('c2-total').value='0.0322'
+    document.getElementById('c3-qty').value='0.0207'; document.getElementById('c3-total').value='0.0056'
+  }
+
+  window.doJalankan=async()=>{
+    const btn=document.getElementById('btn-run'); const errEl=document.getElementById('cl-error')
+    const centroids=[
+      [parseFloat(document.getElementById('c1-qty').value), parseFloat(document.getElementById('c1-total').value)],
+      [parseFloat(document.getElementById('c2-qty').value), parseFloat(document.getElementById('c2-total').value)],
+      [parseFloat(document.getElementById('c3-qty').value), parseFloat(document.getElementById('c3-total').value)],
+    ]
+    btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses Algoritma...'
+    errEl.classList.add('hidden')
+    try {
+      const h=await apiJalankanClustering(centroids)
+      document.getElementById('res-iterasi').textContent=h.iterasi+'×'
+      document.getElementById('res-sse').textContent=h.sse_final
+      document.getElementById('res-sil').textContent=h.sil_score
+      document.getElementById('res-total').textContent=h.total_produk
+      document.getElementById('ringkasan').innerHTML=[
+        {label:'Paling Laris',val:h.ringkasan.paling_laris,color:'#22c55e',bg:'rgba(34,197,94,0.1)',border:'rgba(74,222,128,0.2)'},
+        {label:'Cukup Laris', val:h.ringkasan.cukup_laris, color:'#fbbf24',bg:'rgba(251,191,36,0.1)',border:'rgba(251,191,36,0.2)'},
+        {label:'Kurang Laris',val:h.ringkasan.kurang_laris,color:'#f87171',bg:'rgba(248,113,113,0.1)',border:'rgba(252,165,165,0.2)'},
+      ].map(r=>`<div style="text-align:center;padding:14px;border-radius:14px;background:${r.bg};border:1px solid ${r.border};">
+        <div style="font-size:clamp(20px,5vw,28px);font-weight:900;color:${r.color};font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:5px;">${r.val}</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;">${r.label}</div>
+      </div>`).join('')
+      const sil=interpretasiSil(h.sil_score)
+      document.getElementById('sil-ket').innerHTML=`<strong style="color:#f9fafb;">${sil.label} — Score ${h.sil_score}</strong><br>
+        ${h.sil_score>=0.7?'Struktur pengelompokkan sangat solid. Cluster terpisah dengan jelas.':h.sil_score>=0.5?'Pengelompokkan cukup baik untuk analisis stok produk.':'Struktur overlap, pertimbangkan review centroid.'}`
+      document.getElementById('hasil-section').classList.remove('hidden')
+      document.getElementById('hasil-section').scrollIntoView({behavior:'smooth'})
+      toast('Clustering selesai!','success')
+    } catch(e) {
+      errEl.textContent=e.message; errEl.classList.remove('hidden')
+      toast('Gagal menjalankan clustering!','error')
+    } finally {
+      btn.disabled=false
+      btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> JALANKAN ANALISIS SEKARANG'
     }
-
-    window.doJalankan = async () => {
-      const btn = document.getElementById('btn-run'); const errEl = document.getElementById('cl-error')
-      const centroids = [
-        [parseFloat(document.getElementById('c1-qty').value), parseFloat(document.getElementById('c1-total').value)],
-        [parseFloat(document.getElementById('c2-qty').value), parseFloat(document.getElementById('c2-total').value)],
-        [parseFloat(document.getElementById('c3-qty').value), parseFloat(document.getElementById('c3-total').value)],
-      ]
-      btn.disabled = true
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Algoritma...'
-      errEl.classList.add('hidden')
-      try {
-        const h = await apiJalankanClustering(centroids)
-        document.getElementById('res-iterasi').textContent = h.iterasi + '×'
-        document.getElementById('res-sse').textContent = h.sse_final
-        document.getElementById('res-sil').textContent = h.sil_score
-        document.getElementById('res-total').textContent = h.total_produk
-
-        document.getElementById('ringkasan').innerHTML = [
-          { label:'Paling Laris', val: h.ringkasan.paling_laris, color:'#22c55e', bg:'rgba(34,197,94,0.1)', border:'rgba(74,222,128,0.2)' },
-          { label:'Cukup Laris',  val: h.ringkasan.cukup_laris,  color:'#fbbf24', bg:'rgba(251,191,36,0.1)', border:'rgba(251,191,36,0.2)' },
-          { label:'Kurang Laris', val: h.ringkasan.kurang_laris,  color:'#f87171', bg:'rgba(248,113,113,0.1)', border:'rgba(252,165,165,0.2)' },
-        ].map(r => `
-          <div style="text-align:center; padding:16px; border-radius:14px; background:${r.bg}; border:1px solid ${r.border};">
-            <div style="font-size:28px; font-weight:900; color:${r.color}; font-family:'JetBrains Mono',monospace; line-height:1; margin-bottom:6px;">${r.val}</div>
-            <div style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.06em;">${r.label}</div>
-          </div>
-        `).join('')
-
-        const sil = interpretasiSil(h.sil_score)
-        document.getElementById('sil-ket').innerHTML = `<strong style="color:#f9fafb;">${sil.label} — Score ${h.sil_score}</strong><br>
-          ${h.sil_score >= 0.7 ? 'Struktur pengelompokkan sangat solid. Cluster terpisah dengan jelas.' : h.sil_score >= 0.5 ? 'Pengelompokkan cukup baik untuk analisis stok produk.' : 'Struktur overlap, pertimbangkan review centroid.'}`
-
-        document.getElementById('hasil-section').classList.remove('hidden')
-        document.getElementById('hasil-section').scrollIntoView({ behavior:'smooth' })
-        toast('Clustering selesai!', 'success')
-      } catch(e) {
-        errEl.textContent = e.message
-        errEl.classList.remove('hidden')
-        toast('Gagal menjalankan clustering!', 'error')
-      } finally {
-        btn.disabled = false
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> JALANKAN ANALISIS SEKARANG'
-      }
-    }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'))
-  </script>
+  }
+</script>
+<script>if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))</script>
 </body>
 </html>
